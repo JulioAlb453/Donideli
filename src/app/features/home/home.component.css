@@ -1,0 +1,11 @@
+/* Placeholder tipo “imagen pendiente” (tablero) */
+.promo-placeholder {
+  background-color: #d4d4d4;
+  background-image: repeating-conic-gradient(#e5e5e5 0% 25%, #d4d4d4 0% 50%);
+  background-size: 20px 20px;
+}
+
+/* Carrusel: una vista por slide */
+.promo-track {
+  transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
+}
