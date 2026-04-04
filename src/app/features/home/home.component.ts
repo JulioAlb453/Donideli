@@ -41,7 +41,6 @@ export class HomeComponent {
     },
   ];
 
-  /** Carrusel de promociones: índice de slide visible (0..2) */
   protected readonly promoSlideIndex = signal(0);
 
   protected readonly promoSlideCount = 3;

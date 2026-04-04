@@ -1,0 +1,48 @@
+import type { Collaborator } from '../../domain/collaborator/collaborator.model';
+
+export const COLLABORATOR_SEED: Collaborator[] = [
+  {
+    id: '1',
+    displayName: 'Mariana Lopez',
+    handle: '@maria.donas',
+    bio: 'Especialista en donas artesanales con glaseados únicos y rellenos caseros.',
+    specialty: 'donas',
+    productCount: 12,
+    salesCount: 320,
+    isOnline: true,
+    status: 'active',
+  },
+  {
+    id: '2',
+    displayName: 'Carlos Mendez',
+    handle: '@carlos.galletas',
+    bio: 'Galletas con chips de chocolate y recetas de la abuela, horneadas cada mañana.',
+    specialty: 'galletas',
+    productCount: 8,
+    salesCount: 156,
+    isOnline: true,
+    status: 'active',
+  },
+  {
+    id: '3',
+    displayName: 'Ana Ruiz',
+    handle: '@ana.bebidas',
+    bio: 'Smoothies, cafés fríos y bebidas vegetales para acompañar tu dulce favorito.',
+    specialty: 'bebidas',
+    productCount: 15,
+    salesCount: 410,
+    isOnline: false,
+    status: 'active',
+  },
+  {
+    id: '4',
+    displayName: 'Laura Vega',
+    handle: '@laura.donas',
+    bio: 'Donas veganas y opciones sin gluten con ingredientes locales.',
+    specialty: 'donas',
+    productCount: 10,
+    salesCount: 198,
+    isOnline: true,
+    status: 'active',
+  },
+];
