@@ -76,6 +76,7 @@
       <a
         class="font-heading rounded-xl bg-secondary-400 px-3 py-2.5 text-center text-sm text-white no-underline transition hover:bg-secondary-500"
         [routerLink]="['/buyer/colaborador', collaborator.id, 'menu']"
+        [queryParams]="{ category: collaborator.specialty }"
       >
         Ver menu
       </a>

@@ -1,3 +1,19 @@
 :host {
   display: block;
 }
+
+.menu-product-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.menu-product-card__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  min-height: 5.5rem;
+  overflow: hidden;
+}

@@ -1,18 +1,83 @@
 <app-buyer-navbar />
 
-<main class="min-h-[50vh] bg-[#fffdfb] px-4 py-10">
-  <div class="mx-auto max-w-3xl text-center">
-    <h1 class="font-heading text-3xl text-primary-900">Menú del colaborador</h1>
-    <p class="font-body mt-2 text-primary-700">
-      Colaborador ID: {{ collaboratorId() ?? '—' }}
+<main class="bg-[#fffdfb] pb-16">
+  <section class="bg-secondary-300/90 px-4 py-10 md:py-10">
+    <div class="mx-auto max-w-6xl text-center">
+      <p class="font-body text-lg text-secondary-600">Menu especial: {{ categoryTitle() }}</p>
+      <h1 class="font-heading mt-2 text-4xl text-primary-900 md:text-6xl">Nuestro Menu</h1>
+      <p class="font-body mt-3 text-primary-700">{{ heroDescription() }}</p>
+      <div class="mx-auto mt-5 h-1 w-40 rounded-full bg-secondary-400"></div>
+
+      <div class="font-body mt-8 flex flex-wrap justify-center gap-2">
+        @for (cat of categoryLinks; track cat.id) {
+        <a [routerLink]="['/buyer/colaborador', collaboratorId() ?? 'demo', 'menu']"
+          [queryParams]="{ category: cat.id }" class="rounded-full border px-4 py-2 text-sm no-underline transition"
+          [class.bg-secondary-400]="isActiveCategory(cat.id)" [class.text-white]="isActiveCategory(cat.id)"
+          [class.border-transparent]="isActiveCategory(cat.id)" [class.bg-white]="!isActiveCategory(cat.id)"
+          [class.border-primary-200]="!isActiveCategory(cat.id)" [class.text-primary-800]="!isActiveCategory(cat.id)">
+          {{ cat.label }}
+        </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="px-4 pt-6">
+    <div class="mx-auto grid max-w-6xl grid-flow-dense gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+      @for (product of products(); track product.id) {
+      <article
+        class="menu-product-card flex h-full min-h-[30rem] flex-col overflow-hidden rounded-3xl bg-white shadow-md ring-1 ring-primary-100">
+        <div
+          class="menu-product-card__top flex min-h-[9.5rem] flex-col px-4 py-4"
+          [ngClass]="productCardTopClass()"
+        >
+          <div class="flex min-h-[1rem] flex-wrap gap-1.5">
+            @for (tag of product.tags; track tag) {
+            <span
+              class="font-body rounded-full border px-2 py-0.5 text-xs"
+              [ngClass]="productCardTagClass()"
+              >{{ tag }}</span
+            >
+            }
+          </div>
+          <div class="mt-auto flex flex-1 items-center justify-center pt-3">
+            <app-flaticon-icon class="h-16 w-16" [name]="heroIcon()" />
+          </div>
+        </div>
+
+        <div class="flex flex-1 flex-col gap-2 px-5 py-5">
+          <div class="flex min-h-[4.5rem] items-start justify-between gap-3">
+            <h2 class="menu-product-card__title font-heading text-xl leading-tight text-primary-900 md:text-2xl">
+              {{ product.name }}
+            </h2>
+            <span class="shrink-0 font-heading text-lg text-primary-900 md:text-xl">${{ product.priceMx }}mxn</span>
+          </div>
+          <p class="menu-product-card__description font-body text-sm leading-relaxed text-primary-700">
+            {{ product.description }}
+          </p>
+          <div class="mt-auto pt-1">
+            <button
+              type="button"
+              class="font-heading w-full rounded-xl px-4 py-3 transition"
+              [ngClass]="productCardButtonClass()"
+            >
+              Agregar
+            </button>
+          </div>
+        </div>
+      </article>
+      }
+
+      <aside
+        class="flex min-h-[30rem] h-full flex-col items-center justify-center rounded-3xl border-2 border-dashed border-secondary-300 bg-secondary-50/70 p-8 text-center">
+        <app-flaticon-icon class="h-12 w-12" [name]="heroIcon()" />
+        <h2 class="font-heading mt-4 text-3xl italic text-primary-400">Proximamente</h2>
+        <p class="font-body mt-3 text-primary-600">Nuevas creaciones en camino. Esperalo muy pronto.</p>
+      </aside>
+    </div>
+
+    <p class="font-body mt-8 text-center text-sm text-primary-600">
+      Colaborador: {{ collaboratorId() ?? '—' }}
     </p>
-    <p class="font-body mt-6 text-sm text-primary-600">
-      Vista en construcción: aquí se listarán los productos del vendedor.
-    </p>
-    <a
-      routerLink="/buyer/colaboradores"
-      class="font-body mt-8 inline-block text-secondary-600 underline underline-offset-4"
-      >← Volver a colaboradores</a
-    >
-  </div>
+  </section>
 </main>

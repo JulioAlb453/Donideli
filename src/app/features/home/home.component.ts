@@ -1,11 +1,12 @@
 import { Component, signal } from '@angular/core';
+import type { CollaboratorCategory } from '../../core/domain/collaborator/collaborator.model';
 import type { FlaticonIconName } from '../../shared/ui/flaticon-icon/flaticon-icons.config';
 
 export interface CategoryCard {
   title: string;
   description: string;
-  menuLink: string;
   flaticonIcon: FlaticonIconName;
+  category: CollaboratorCategory;
 }
 
 @Component({
@@ -21,28 +22,27 @@ export class HomeComponent {
     {
       title: 'Galletas',
       description:
-        'Crujientes, con chips de chocolate o recetas caseras. El complemento perfecto para tu café.',
-      menuLink: '#',
+        'Crujientes, con chips de chocolate o recetas caseras. El complemento perfecto para tu cafe.',
       flaticonIcon: 'cookie',
+      category: 'galletas',
     },
     {
       title: 'Donas',
       description:
-        'Glaseadas, rellenas y recién hechas. Elige tu favorita y endulza el día.',
-      menuLink: '#',
+        'Glaseadas, rellenas y recien hechas. Elige tu favorita y endulza el dia.',
       flaticonIcon: 'donut',
+      category: 'donas',
     },
     {
       title: 'Bebidas',
       description:
-        'Cafés, smoothies y bebidas frías para acompañar tus postres.',
-      menuLink: '#',
+        'Cafes, smoothies y bebidas frias para acompanar tus postres.',
       flaticonIcon: 'milk-bottle',
+      category: 'bebidas',
     },
   ];
 
   protected readonly promoSlideIndex = signal(0);
-
   protected readonly promoSlideCount = 3;
 
   protected setPromoSlide(index: number): void {
