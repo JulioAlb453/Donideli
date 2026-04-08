@@ -1,3 +1,70 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+
+@theme {
+  /* Tipografía */
+  --font-heading: 'Marcellus SC', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-body: 'Montserrat Alternates', ui-sans-serif, system-ui, sans-serif;
+
+  /* Primary — #624C43 + variaciones */
+  --color-primary-50: #faf7f6;
+  --color-primary-100: #f0e8e5;
+  --color-primary-200: #d9c9c2;
+  --color-primary-300: #b8a099;
+  --color-primary-400: #8f7568;
+  --color-primary-500: #624c43;
+  --color-primary-600: #564038;
+  --color-primary-700: #4a352c;
+  --color-primary-800: #3d2e26;
+  --color-primary-900: #2a221f;
+  --color-primary-950: #1a1513;
+
+  /* Accent — #F8C85C + variaciones */
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #f5d06a;
+  --color-accent-500: #f8c85c;
+  --color-accent-600: #d4a84a;
+  --color-accent-700: #b08938;
+  --color-accent-800: #8c6c30;
+  --color-accent-900: #735528;
+  --color-accent-950: #3d2c15;
+
+  /* Secondary — #F8BBD0 + variaciones */
+  --color-secondary-50: #fef7fa;
+  --color-secondary-100: #fcecf3;
+  --color-secondary-200: #f9d9e6;
+  --color-secondary-300: #f8bbd0;
+  --color-secondary-400: #f093b8;
+  --color-secondary-500: #e875a3;
+  --color-secondary-600: #d45686;
+  --color-secondary-700: #b03d68;
+  --color-secondary-800: #8f3355;
+  --color-secondary-900: #772e4a;
+  --color-secondary-950: #45182a;
+
+  --color-brand: #624c43;
+  --color-brand-accent: #f8c85c;
+  --color-brand-secondary: #f8bbd0;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-primary-50 font-body text-primary-900;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading text-primary-900;
+  }
+}

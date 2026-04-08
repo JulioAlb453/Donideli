@@ -1,0 +1,50 @@
+<header
+  class="border-b border-secondary-200/80 bg-secondary-300 px-4 py-3 shadow-sm md:px-6"
+>
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
+    <a
+      routerLink="/"
+      class="flex items-center gap-3 text-left text-primary-900 no-underline"
+    >
+      <span
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 font-heading text-lg text-white"
+        aria-hidden="true"
+        >D</span
+      >
+      <span>
+        <span class="font-heading block text-xl leading-tight">DoniDeli</span>
+        <span class="font-body block text-xs text-primary-700">Sacia tu antojo</span>
+      </span>
+    </a>
+
+    <nav
+      class="font-body flex flex-wrap items-center gap-1 text-sm md:gap-6"
+      aria-label="Principal"
+    >
+      <a
+        routerLink="/"
+        [routerLinkActive]="rlaNav"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        >Inicio</a
+      >
+      <a
+        href="#"
+        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        >Menu</a
+      >
+      <a
+        routerLink="/buyer/colaboradores"
+        [routerLinkActive]="rlaNav"
+        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        >Colaboradores</a
+      >
+      <a
+        href="#"
+        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        >Promociones</a
+      >
+    </nav>
+
+  </div>
+</header>

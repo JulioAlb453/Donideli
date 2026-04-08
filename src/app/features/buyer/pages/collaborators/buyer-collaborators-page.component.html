@@ -1,0 +1,91 @@
+<app-buyer-navbar />
+
+<main class="bg-[#fffdfb] px-4 pb-16 pt-8 md:px-8">
+  <div class="mx-auto max-w-6xl">
+    <div class="mb-10 text-center md:text-left">
+      <p
+        class="font-body mb-3 inline-block rounded-full bg-secondary-400 px-4 py-1 text-xs font-medium text-white"
+      >
+        Red de colaboradores
+      </p>
+      <h1 class="font-heading text-3xl text-primary-900 md:text-4xl">
+        Nuestros Colaboradores
+      </h1>
+      <p
+        class="font-body mx-auto mt-3 max-w-2xl text-base leading-relaxed text-primary-700 md:mx-0"
+      >
+        Cada colaborador gestiona su propio menú en DoniDeli. Explora especialidades,
+        conoce su historia y elige tu próximo antojo.
+      </p>
+    </div>
+
+    <div
+      class="font-body mb-8 flex flex-wrap justify-center gap-2 md:justify-start"
+      role="group"
+      aria-label="Filtrar por categoría"
+    >
+      @for (opt of filterOptions; track opt.id) {
+        <button
+          type="button"
+          class="rounded-full border px-4 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400"
+          [class.border-primary-500]="!isFilterActive(opt.id)"
+          [class.bg-white]="!isFilterActive(opt.id)"
+          [class.text-primary-800]="!isFilterActive(opt.id)"
+          [class.border-transparent]="isFilterActive(opt.id)"
+          [class.bg-secondary-400]="isFilterActive(opt.id)"
+          [class.text-white]="isFilterActive(opt.id)"
+          [attr.aria-pressed]="isFilterActive(opt.id)"
+          (click)="setFilter(opt.id)"
+        >
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+
+    <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <h2 class="font-heading shrink-0 text-xl italic text-primary-800">
+        Colaboradores Activos
+      </h2>
+      <div
+        class="h-px min-h-px flex-1 bg-primary-200"
+        role="presentation"
+        aria-hidden="true"
+      ></div>
+    </div>
+
+    <div
+      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
+      @for (c of filteredCollaborators(); track c.id) {
+        <app-collaborator-card [collaborator]="c" />
+      }
+
+      <aside
+        class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-secondary-400 bg-secondary-100/80 px-5 py-10 text-center shadow-sm"
+        aria-labelledby="cta-seller-heading"
+      >
+        <div
+          class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary-400 text-3xl font-light text-white"
+          aria-hidden="true"
+        >
+          +
+        </div>
+        <h2
+          id="cta-seller-heading"
+          class="font-heading text-xl text-primary-900"
+        >
+          ¿Quieres Vender aquí?
+        </h2>
+        <p class="font-body mt-2 text-sm leading-relaxed text-primary-700">
+          Únete a nuestra red de colaboradores y gestiona tu propio menú en DoniDeli.
+        </p>
+        <a
+          href="#"
+          class="font-heading mt-6 w-full max-w-xs rounded-xl bg-secondary-400 px-4 py-3 text-center text-sm text-white no-underline transition hover:bg-secondary-500"
+        >
+          Postularme Ahora!
+        </a>
+      </aside>
+    </div>
+  </div>
+</main>
