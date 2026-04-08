@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: donideli
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm run build
+    startCommand: node dist/donideli/server/server.mjs
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22.14.0"
+      - key: NODE_ENV
+        value: production

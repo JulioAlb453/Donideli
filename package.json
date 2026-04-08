@@ -1,6 +1,17 @@
 {
   "name": "donideli",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract"
+    ]
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
