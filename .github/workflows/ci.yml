@@ -27,8 +27,8 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-      - name: Compilar (producción)
-        run: pnpm run build
+      - name: Compilar (mismo perfil que Render: estatico + SPA)
+        run: pnpm run build:render
 
       - name: Pruebas unitarias
         run: pnpm exec ng test --watch=false
