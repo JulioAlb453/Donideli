@@ -6,7 +6,8 @@ services:
     # SSR de Angular supera 512 Mi; este despliegue usa build estatico + servidor SPA ligero.
     plan: free
     buildCommand: NODE_OPTIONS=--max-old-space-size=3072 corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm exec ng build --configuration=production-static
-    startCommand: node scripts/render-spa-server.mjs
+    # No uses node dist/.../server.mjs (SSR Angular ~>512Mi). Solo este script.
+    startCommand: node ./scripts/render-spa-server.mjs
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
