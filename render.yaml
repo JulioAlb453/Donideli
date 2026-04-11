@@ -3,8 +3,8 @@ services:
     name: donideli
     runtime: node
     region: oregon
-    plan: free
-    buildCommand: corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm run build
+    plan: standard
+    buildCommand: NODE_OPTIONS=--max-old-space-size=3072 corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm run build
     startCommand: node dist/donideli/server/server.mjs
     healthCheckPath: /
     envVars:
@@ -12,3 +12,6 @@ services:
         value: "22.14.0"
       - key: NODE_ENV
         value: production
+      # Límite de heap V8 por debajo de la RAM del plan para dejar margen al runtime nativo
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=1536"
