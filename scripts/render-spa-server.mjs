@@ -1,7 +1,3 @@
-/**
- * Sirve dist/donideli/browser sin motor Angular SSR (uso de RAM muy bajo, apto plan free Render).
- * Rutas sin HTML pregenerado reciben index.csr.html para que el router hidrate en el cliente.
- */
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -9,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../dist/donideli/browser');
-const port = Number(process.env.PORT) || 4000;
+const port = process.env.PORT || 10000;;
 const host = '0.0.0.0';
 
 if (!fs.existsSync(root)) {
@@ -96,7 +92,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, host, () => {
-  console.log(
-    `[render-spa] Escuchando en http://${host}:${port} (PORT=${process.env.PORT ?? 'default'})`,
-  );
+  console.log(`[render-spa] Servidor listo en http://${host}:${port}`);
 });
