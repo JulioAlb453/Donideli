@@ -67,6 +67,24 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "production-static": {
+              "outputMode": "static",
+              "server": false,
+              "ssr": false,
+              "outputHashing": "all",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

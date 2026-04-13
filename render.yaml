@@ -3,15 +3,15 @@ services:
     name: donideli
     runtime: node
     region: oregon
-    plan: standard
-    buildCommand: NODE_OPTIONS=--max-old-space-size=3072 corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm run build
-    startCommand: node dist/donideli/server/server.mjs
+    # SSR de Angular supera 512 Mi; este despliegue usa build estatico + servidor SPA ligero.
+    plan: free
+    # Build ligero (sin bundles de servidor). Heap acotado para entornos con ~512 MiB en build.
+    buildCommand: NODE_OPTIONS=--max-old-space-size=460 corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm exec ng build --configuration=production-static
+    # No uses node dist/.../server.mjs (SSR Angular ~>512Mi). Solo este script.
+    startCommand: node ./scripts/render-spa-server.mjs
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
         value: "22.14.0"
       - key: NODE_ENV
         value: production
-      # Límite de heap V8 por debajo de la RAM del plan para dejar margen al runtime nativo
-      - key: NODE_OPTIONS
-        value: "--max-old-space-size=1536"
