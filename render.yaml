@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     buildCommand: corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && NODE_OPTIONS=--max-old-space-size=450 pnpm run build:render
-    startCommand: pnpm run start:render 
+    startCommand: pnpm start 
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
