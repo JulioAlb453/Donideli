@@ -14,7 +14,7 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "node ./scripts/start.mjs",
     "build": "ng build",
     "build:render": "ng build --configuration=production-static",
     "start:render": "node scripts/render-spa-server.mjs",
