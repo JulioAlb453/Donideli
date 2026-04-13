@@ -9,17 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../dist/donideli/browser');
+const indexCsr = path.join(root, 'index.csr.html');
 const port = Number(process.env.PORT) || 4000;
-const host = '0.0.0.0';
-
-if (!fs.existsSync(root)) {
-  console.error(`[render-spa] No existe la carpeta de build: ${root}`);
-  process.exit(1);
-}
-
-const spaShell = fs.existsSync(path.join(root, 'index.csr.html'))
-  ? path.join(root, 'index.csr.html')
-  : path.join(root, 'index.html');
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -59,7 +50,7 @@ function readAndSend(res, filePath) {
 }
 
 function sendCsrShell(res) {
-  fs.readFile(spaShell, (err, data) => {
+  fs.readFile(indexCsr, (err, data) => {
     if (err) return send(res, 404, 'No encontrado', { 'Content-Type': 'text/plain; charset=utf-8' });
     send(res, 200, data, {
       'Content-Type': 'text/html; charset=utf-8',
@@ -95,8 +86,6 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(port, host, () => {
-  console.log(
-    `[render-spa] Escuchando en http://${host}:${port} (PORT=${process.env.PORT ?? 'default'})`,
-  );
+server.listen(port, () => {
+  console.log(`Donideli (estatico + SPA): http://localhost:${port}`);
 });

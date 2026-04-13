@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Compilar (mismo perfil que Render: estatico + SPA)
-        run: NODE_OPTIONS=--max-old-space-size=460 pnpm exec ng build --configuration=production-static
+        run: pnpm run build:render
 
       - name: Pruebas unitarias
         run: pnpm exec ng test --watch=false

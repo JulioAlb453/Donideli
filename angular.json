@@ -70,8 +70,6 @@
             },
             "production-static": {
               "outputMode": "static",
-              "server": false,
-              "ssr": false,
               "outputHashing": "all",
               "budgets": [
                 {
