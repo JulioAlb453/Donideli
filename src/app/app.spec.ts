@@ -9,6 +9,9 @@ import { BuyerNavbarComponent } from './features/buyer/components/buyer-navbar/b
 import { CollaboratorCardComponent } from './features/buyer/components/collaborator-card/collaborator-card.component';
 import { BuyerCollaboratorsPageComponent } from './features/buyer/pages/collaborators/buyer-collaborators-page.component';
 import { BuyerCollaboratorMenuPageComponent } from './features/buyer/pages/collaborator-menu/buyer-collaborator-menu-page.component';
+import { AdminProductsPageComponent } from './features/admin/pages/products/admin-products-page.component';
+import { AdminProductRepositoryPort } from './core/domain/admin-product/admin-product.repository.port';
+import { AdminProductInMemoryRepository } from './core/infrastructure/admin-products/admin-product-in-memory.repository';
 import { FlaticonIconComponent } from './shared/ui/flaticon-icon/flaticon-icon.component';
 
 describe('App', () => {
@@ -23,11 +26,16 @@ describe('App', () => {
         CollaboratorCardComponent,
         BuyerCollaboratorsPageComponent,
         BuyerCollaboratorMenuPageComponent,
+        AdminProductsPageComponent,
       ],
       providers: [
         {
           provide: CollaboratorRepositoryPort,
           useClass: CollaboratorInMemoryRepository,
+        },
+        {
+          provide: AdminProductRepositoryPort,
+          useClass: AdminProductInMemoryRepository,
         },
       ],
     }).compileComponents();
