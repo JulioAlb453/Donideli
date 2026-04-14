@@ -1,5 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import { GetAllAdminProductsUseCase } from '../../../../core/application/admin-products/get-all-admin-products.use-case';
 import {
   filterAdminProducts,
@@ -15,6 +17,11 @@ import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-cat
   styleUrl: './admin-products-page.component.css',
 })
 export class AdminProductsPageComponent {
+  @ViewChild('productTrack', { read: ElementRef })
+  private readonly productTrack?: ElementRef<HTMLElement>;
+
+  private readonly authSession = inject(AuthSessionService);
+  private readonly router = inject(Router);
   private readonly getAllAdminProducts = inject(GetAllAdminProductsUseCase);
 
   private readonly allProducts = toSignal(this.getAllAdminProducts.execute(), {
@@ -74,5 +81,19 @@ export class AdminProductsPageComponent {
 
   protected onNewProduct(): void {
     // Reservado: alta de producto
+  }
+
+  protected logout(): void {
+    this.authSession.logout();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
+
+  protected scrollProducts(direction: -1 | 1): void {
+    const el = this.productTrack?.nativeElement;
+    if (!el) {
+      return;
+    }
+    const step = Math.max(280, Math.floor(el.clientWidth * 0.75)) * direction;
+    el.scrollBy({ left: step, behavior: 'smooth' });
   }
 }

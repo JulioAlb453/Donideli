@@ -3,7 +3,7 @@
 >
   <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
     <a
-      routerLink="/"
+      routerLink="/buyer/inicio"
       class="flex items-center gap-3 text-left text-primary-900 no-underline"
     >
       <span
@@ -22,7 +22,7 @@
       aria-label="Principal"
     >
       <a
-        routerLink="/"
+        routerLink="/buyer/inicio"
         [routerLinkActive]="rlaNav"
         [routerLinkActiveOptions]="{ exact: true }"
         class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
@@ -44,6 +44,13 @@
         class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Promociones</a
       >
+      <button
+        type="button"
+        class="rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
+        (click)="logout()"
+      >
+        Cerrar sesión
+      </button>
     </nav>
 
   </div>
