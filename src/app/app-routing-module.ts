@@ -4,6 +4,8 @@ import { HomeComponent } from './features/home/home.component';
 import { BuyerCollaboratorsPageComponent } from './features/buyer/pages/collaborators/buyer-collaborators-page.component';
 import { BuyerCollaboratorMenuPageComponent } from './features/buyer/pages/collaborator-menu/buyer-collaborator-menu-page.component';
 import { AdminProductsPageComponent } from './features/admin/pages/products/admin-products-page.component';
+import { AdminGlobalSalesPageComponent } from './features/admin/pages/global-sales/admin-global-sales-page.component';
+import { AdminFutureUpdatesPageComponent } from './features/admin/pages/future-updates/admin-future-updates-page.component';
 import { LoginPageComponent } from './features/auth/pages/login/login-page.component';
 import {
   adminRoleGuard,
@@ -28,6 +30,29 @@ export const routes: Routes = [
     path: 'admin/productos',
     component: AdminProductsPageComponent,
     canActivate: [adminRoleGuard],
+  },
+  {
+    path: 'admin/ventas-globales',
+    component: AdminGlobalSalesPageComponent,
+    canActivate: [adminRoleGuard],
+  },
+  {
+    path: 'admin/proximas-actualizaciones/postulantes',
+    component: AdminFutureUpdatesPageComponent,
+    canActivate: [adminRoleGuard],
+    data: { futureArea: 'postulantes' },
+  },
+  {
+    path: 'admin/proximas-actualizaciones/colaboradores',
+    component: AdminFutureUpdatesPageComponent,
+    canActivate: [adminRoleGuard],
+    data: { futureArea: 'colaboradores' },
+  },
+  {
+    path: 'admin/proximas-actualizaciones',
+    component: AdminFutureUpdatesPageComponent,
+    canActivate: [adminRoleGuard],
+    data: { futureArea: 'general' },
   },
   { path: '**', redirectTo: 'login' },
 ];

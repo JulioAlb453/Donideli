@@ -1,0 +1,154 @@
+<div class="admin-layout flex min-h-screen bg-primary-50">
+  <aside
+    class="admin-sidebar hidden w-64 shrink-0 flex-col border-r border-primary-800 bg-primary-900 text-primary-100 md:flex"
+    aria-label="Navegación de administración"
+  >
+    <div class="border-b border-primary-800 px-5 py-6">
+      <p class="font-heading text-xl text-white">DoniDeli</p>
+      <span
+        class="font-body mt-2 inline-flex items-center gap-1 rounded-full bg-secondary-400 px-3 py-1 text-xs font-medium text-white"
+      >
+        <span aria-hidden="true">⚙</span> ADMINISTRADOR
+      </span>
+    </div>
+    <div class="border-b border-primary-800 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <span
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-700 font-heading text-sm text-white"
+          >A</span
+        >
+        <div>
+          <p class="font-heading text-sm text-white">Admin DoniDeli</p>
+          <p class="font-body text-xs text-primary-300">SUPER ADMIN</p>
+        </div>
+      </div>
+    </div>
+    <nav class="flex flex-1 flex-col gap-1 px-3 py-4 font-body text-sm">
+      <p class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-primary-400">Gestión</p>
+      <a
+        routerLink="/admin/productos"
+        routerLinkActive="bg-secondary-400 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
+      >
+        <span class="text-base" aria-hidden="true">🍩</span>
+        Productos
+      </a>
+      <a
+        routerLink="/admin/ventas-globales"
+        routerLinkActive="bg-secondary-400 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
+      >
+        <span aria-hidden="true">📊</span>
+        Ventas globales
+        <span class="ml-auto rounded-full bg-secondary-500 px-1.5 text-xs text-white">5</span>
+      </a>
+      <a
+        routerLink="/buyer/colaboradores"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
+      >
+        <span aria-hidden="true">👥</span>
+        Colaboradores
+      </a>
+      <span
+        class="flex cursor-not-allowed items-center gap-2 rounded-xl px-3 py-2.5 text-primary-500"
+        title="Próximamente"
+      >
+        <span aria-hidden="true">📋</span>
+        Postulantes
+        <span class="ml-auto rounded-full bg-secondary-500 px-1.5 text-xs text-white">4</span>
+      </span>
+      <p class="mb-2 mt-6 px-2 text-xs font-semibold uppercase tracking-wide text-primary-400">Sistema</p>
+      <a
+        routerLink="/admin/proximas-actualizaciones"
+        routerLinkActive="bg-secondary-400 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
+      >
+        <span aria-hidden="true">✨</span>
+        Próximas actualizaciones
+      </a>
+      <span class="flex cursor-not-allowed items-center gap-2 rounded-xl px-3 py-2.5 text-primary-500">
+        <span aria-hidden="true">⚙</span>
+        Ajustes
+      </span>
+      <button
+        type="button"
+        class="mt-auto flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-200 no-underline transition hover:bg-primary-800 hover:text-white"
+        (click)="logout()"
+      >
+        <span aria-hidden="true">⎋</span>
+        Cerrar sesión
+      </button>
+    </nav>
+  </aside>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <div
+      class="relative flex items-center justify-center border-b border-primary-800 bg-primary-900 px-4 py-3 text-sm text-primary-100 md:hidden"
+    >
+      <span class="font-heading px-12 text-center text-white">DoniDeli · Admin</span>
+      <button
+        type="button"
+        class="font-body absolute right-4 top-1/2 max-w-[40%] -translate-y-1/2 truncate rounded-lg bg-primary-800 px-2 py-1 text-xs text-primary-100"
+        (click)="logout()"
+      >
+        Cerrar sesión
+      </button>
+    </div>
+    <header
+      class="sticky top-0 z-10 border-b border-primary-200 bg-white/95 px-4 py-4 backdrop-blur md:px-8"
+    >
+      <h1 class="font-heading text-lg text-primary-900 md:text-xl">Próximas actualizaciones</h1>
+    </header>
+
+    <main class="flex-1 px-4 py-8 md:px-8">
+      <div
+        class="mx-auto max-w-2xl rounded-3xl border border-primary-100 bg-white p-8 shadow-md ring-1 ring-primary-50 md:p-10"
+      >
+        <div
+          class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary-100 text-3xl text-secondary-600"
+          aria-hidden="true"
+        >
+          ✨
+        </div>
+        <h2 class="font-heading text-2xl text-primary-900 md:text-3xl">Actualización general en preparación</h2>
+        <p class="font-body mt-3 text-primary-600">
+          Esta pantalla anticipa la próxima entrega global de DoniDeli para administradores. El contenido es
+          orientativo y puede cambiar según prioridades del producto.
+        </p>
+
+        <div class="mt-8 rounded-2xl border border-dashed border-secondary-200 bg-secondary-50/40 p-5 md:p-6">
+          <p class="font-heading text-sm uppercase tracking-wide text-secondary-700">En roadmap</p>
+          <ul class="font-body mt-4 list-disc space-y-2 pl-5 text-primary-800">
+            <li>Informes exportables y filtros avanzados en ventas globales</li>
+            <li>Gestión de postulantes y altas de colaboradores desde el panel</li>
+            <li>Ajustes de cuenta, roles y notificaciones centralizadas</li>
+            <li>API en vivo para catálogo y pedidos (sustitución de datos demo)</li>
+          </ul>
+        </div>
+
+        <p class="font-body mt-6 text-sm text-primary-500">
+          Cuando publiquemos la actualización, verás los cambios aquí y en el resto del panel. Mientras tanto puedes
+          seguir usando productos y ventas globales.
+        </p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a
+            routerLink="/admin/productos"
+            class="font-heading inline-flex items-center justify-center rounded-xl bg-secondary-400 px-5 py-2.5 text-sm text-white no-underline shadow-sm transition hover:bg-secondary-500"
+          >
+            Ir a productos
+          </a>
+          <a
+            routerLink="/admin/ventas-globales"
+            class="font-heading inline-flex items-center justify-center rounded-xl border border-primary-200 bg-white px-5 py-2.5 text-sm text-primary-800 no-underline transition hover:bg-primary-50"
+          >
+            Ver ventas globales
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

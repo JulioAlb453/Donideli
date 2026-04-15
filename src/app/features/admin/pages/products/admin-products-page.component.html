@@ -36,14 +36,16 @@
         <span class="text-base" aria-hidden="true">🍩</span>
         Productos
       </a>
-      <span
-        class="flex cursor-not-allowed items-center gap-2 rounded-xl px-3 py-2.5 text-primary-500"
-        title="Próximamente"
+      <a
+        routerLink="/admin/ventas-globales"
+        routerLinkActive="bg-secondary-400 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
       >
         <span aria-hidden="true">📊</span>
         Ventas globales
         <span class="ml-auto rounded-full bg-secondary-500 px-1.5 text-xs text-white">5</span>
-      </span>
+      </a>
       <a
         routerLink="/buyer/colaboradores"
         class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
@@ -62,6 +64,15 @@
       <p class="mb-2 mt-6 px-2 text-xs font-semibold uppercase tracking-wide text-primary-400">
         Sistema
       </p>
+      <a
+        routerLink="/admin/proximas-actualizaciones"
+        routerLinkActive="bg-secondary-400 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
+      >
+        <span aria-hidden="true">✨</span>
+        Próximas actualizaciones
+      </a>
       <span class="flex cursor-not-allowed items-center gap-2 rounded-xl px-3 py-2.5 text-primary-500">
         <span aria-hidden="true">⚙</span>
         Ajustes
