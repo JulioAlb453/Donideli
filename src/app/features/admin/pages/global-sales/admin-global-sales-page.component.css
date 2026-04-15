@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.admin-orders-scrollbox {
+  max-height: min(65vh, 32rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-orders-scrollbox:focus-visible {
+  outline: 2px solid rgb(244 114 182);
+  outline-offset: 2px;
+}
+
+.admin-orders-scrollbox::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-orders-scrollbox::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(203 213 225);
+}
+
+.admin-orders-scrollbox::-webkit-scrollbar-track {
+  background: rgb(248 250 252);
+}
+
+.admin-orders-thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* --color-primary-50 con opacidad para sticky sobre filas */
+  background-color: rgb(250 247 246 / 0.96);
+  box-shadow: inset 0 -1px 0 rgb(226 232 240);
+  backdrop-filter: blur(4px);
+}

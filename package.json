@@ -12,16 +12,16 @@
       "msgpackr-extract"
     ]
   },
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "build:render": "ng build --configuration=production-static",
-    "start:render": "node scripts/render-spa-server.mjs",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:donideli": "node dist/donideli/server/server.mjs"
-  },
+ "scripts": {
+  "ng": "ng",
+  "start": "node scripts/render-spa-server.mjs",
+  "build": "ng build",
+  "build:render": "ng build --configuration=production-static",
+  "start:render": "node scripts/render-spa-server.mjs",
+  "watch": "ng build --watch --configuration development",
+  "test": "ng test",
+  "serve:ssr:donideli": "node dist/donideli/server/server.mjs"
+},
   "private": true,
   "packageManager": "pnpm",
   "dependencies": {

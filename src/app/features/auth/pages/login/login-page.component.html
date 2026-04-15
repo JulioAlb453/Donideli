@@ -1,0 +1,87 @@
+<main class="flex min-h-screen items-center justify-center bg-primary-50 px-4 py-12">
+  <section class="w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-primary-100">
+    <div class="grid md:grid-cols-2">
+      <div class="bg-primary-900 px-8 py-10 text-white">
+        <p class="font-heading text-3xl">DoniDeli</p>
+        <p class="font-body mt-3 text-primary-100">Accede con tu perfil para gestionar o explorar productos.</p>
+
+        <div class="mt-8 space-y-3 rounded-2xl bg-primary-800/80 p-4">
+          <p class="font-heading text-base">Credenciales demo</p>
+          <p class="font-body text-sm text-primary-100">
+            Comprador: comprador@donideli.com / buyer123
+          </p>
+          <p class="font-body text-sm text-primary-100">
+            Admin: admin@donideli.com / admin123
+          </p>
+        </div>
+      </div>
+
+      <div class="px-6 py-8 md:px-8 md:py-10">
+        <p class="font-heading text-2xl text-primary-900">Iniciar sesión</p>
+        <p class="font-body mt-1 text-sm text-primary-600">Selecciona tu tipo de usuario.</p>
+
+        <div class="mt-6 flex gap-2 rounded-2xl bg-primary-50 p-1" role="tablist" aria-label="Tipo de acceso">
+          <button
+            type="button"
+            class="font-body flex-1 rounded-xl px-3 py-2 text-sm transition"
+            [class.bg-secondary-400]="role() === 'buyer'"
+            [class.text-white]="role() === 'buyer'"
+            [class.text-primary-700]="role() !== 'buyer'"
+            (click)="setRole('buyer')"
+          >
+            Comprador
+          </button>
+          <button
+            type="button"
+            class="font-body flex-1 rounded-xl px-3 py-2 text-sm transition"
+            [class.bg-secondary-400]="role() === 'admin'"
+            [class.text-white]="role() === 'admin'"
+            [class.text-primary-700]="role() !== 'admin'"
+            (click)="setRole('admin')"
+          >
+            Administrador
+          </button>
+        </div>
+
+        <form class="mt-6 space-y-4" (ngSubmit)="submit()" #loginForm="ngForm">
+          <label class="font-body block text-sm text-primary-700">
+            Correo
+            <input
+              required
+              type="email"
+              name="email"
+              class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+              [value]="email()"
+              (input)="onEmailInput($event)"
+            />
+          </label>
+
+          <label class="font-body block text-sm text-primary-700">
+            Contraseña
+            <input
+              required
+              type="password"
+              name="password"
+              class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+              [value]="password()"
+              (input)="onPasswordInput($event)"
+            />
+          </label>
+
+          @if (errorMessage()) {
+            <p class="font-body rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+              {{ errorMessage() }}
+            </p>
+          }
+
+          <button
+            type="submit"
+            class="font-heading w-full rounded-xl bg-secondary-400 px-4 py-3 text-white transition hover:bg-secondary-500"
+          >
+            Entrar como {{ role() === 'admin' ? 'Administrador' : 'Comprador' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>

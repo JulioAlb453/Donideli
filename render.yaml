@@ -3,13 +3,12 @@ services:
     name: donideli
     runtime: node
     region: oregon
-    # SSR de Angular supera 512 Mi; este despliegue usa build estatico + servidor SPA ligero.
     plan: free
-    buildCommand: NODE_OPTIONS=--max-old-space-size=3072 corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && pnpm run build:render
-    startCommand: node scripts/render-spa-server.mjs
+    buildCommand: corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install --frozen-lockfile && NODE_OPTIONS=--max-old-space-size=450 pnpm run build:render
+    startCommand: pnpm start 
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
-        value: "22.14.0"
+        value: "22.14.0" 
       - key: NODE_ENV
         value: production
