@@ -6,9 +6,29 @@
   animation: slideIn 0.25s ease-out;
 }
 
+@media (max-width: 767px) {
+  .admin-chat-sidebar {
+    animation: slideUp 0.25s ease-out;
+  }
+}
+
 @keyframes slideIn {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.admin-chat-overlay {
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .admin-chat-messages {
@@ -27,4 +47,13 @@
 .admin-chat-messages::-webkit-scrollbar-thumb {
   background-color: #d6d3d1;
   border-radius: 9999px;
+}
+
+/* Safe areas para dispositivos con notch */
+.safe-area-top {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.safe-area-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
