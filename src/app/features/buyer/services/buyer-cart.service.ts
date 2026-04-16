@@ -4,6 +4,8 @@ import type { FlaticonIconName } from '../../../shared/ui/flaticon-icon/flaticon
 
 export interface BuyerCartLine {
   lineId: string;
+  id_colaborador: string;
+  email_colaborador: string;
   id_producto: string;
   nombre: string;
   precio: number;
@@ -45,6 +47,7 @@ export class BuyerCartService {
 
   addProduct(input: {
     id_colaborador: string;
+    email_colaborador: string;
     id_producto: string;
     nombre: string;
     precio: number;
@@ -63,6 +66,8 @@ export class BuyerCartService {
         ...current,
         {
           lineId,
+          id_colaborador: input.id_colaborador,
+          email_colaborador: input.email_colaborador,
           id_producto: input.id_producto,
           nombre: input.nombre,
           precio: input.precio,
@@ -145,8 +150,11 @@ export class BuyerCartService {
 }
 
 function normalizeLegacyLine(row: LegacyBuyerCartLine): BuyerCartLine {
+  const r = row as unknown as Record<string, unknown>;
   return {
     lineId: row.lineId,
+    id_colaborador: (r['id_colaborador'] as string) ?? '',
+    email_colaborador: (r['email_colaborador'] as string) ?? '',
     id_producto: row.id_producto ?? row.productId ?? '',
     nombre: row.nombre ?? row.name ?? '',
     precio: row.precio ?? row.priceMx ?? 0,

@@ -10,6 +10,8 @@ export interface BuyerOrderLine {
 
 export interface BuyerOrder {
   id_pedido: string;
+  id_colaborador: string;
+  email_colaborador: string;
   fecha_creacion: string;
   fecha_entrega: string;
   horario_entrega: string;
@@ -21,74 +23,44 @@ export interface BuyerOrder {
   total: number;
 }
 
-const MOCK_ORDERS: BuyerOrder[] = [
-  {
-    id_pedido: 'PED-001',
-    fecha_creacion: '2026-04-14T10:30:00',
-    fecha_entrega: '2026-04-16',
-    horario_entrega: '09-12',
-    estado: 'pendiente',
-    nombre_colaborador: 'Mariana López',
-    lineas: [
-      { nombre_producto: 'Leche Santa Clara', cantidad: 2, precio: 15 },
-      { nombre_producto: 'Glaseada Rosa', cantidad: 1, precio: 17 },
-    ],
-    subtotal: 47,
-    costo_envio: 20,
-    total: 67,
-  },
-  {
-    id_pedido: 'PED-002',
-    fecha_creacion: '2026-04-13T14:00:00',
-    fecha_entrega: '2026-04-15',
-    horario_entrega: '12-15',
-    estado: 'en_camino',
-    nombre_colaborador: 'Ana Ruiz',
-    lineas: [
-      { nombre_producto: 'Frappe de Vainilla', cantidad: 1, precio: 55 },
-    ],
-    subtotal: 55,
-    costo_envio: 20,
-    total: 75,
-  },
-  {
-    id_pedido: 'PED-003',
-    fecha_creacion: '2026-04-10T09:15:00',
-    fecha_entrega: '2026-04-11',
-    horario_entrega: '15-18',
-    estado: 'entregado',
-    nombre_colaborador: 'Luis Ortega',
-    lineas: [
-      { nombre_producto: 'Cookie Choco Chips', cantidad: 3, precio: 22 },
-      { nombre_producto: 'Avena y Miel', cantidad: 2, precio: 20 },
-    ],
-    subtotal: 106,
-    costo_envio: 20,
-    total: 126,
-  },
-  {
-    id_pedido: 'PED-004',
-    fecha_creacion: '2026-04-08T16:45:00',
-    fecha_entrega: '2026-04-09',
-    horario_entrega: '18-20',
-    estado: 'cancelado',
-    nombre_colaborador: 'Mariana López',
-    lineas: [
-      { nombre_producto: 'Iced Latte', cantidad: 2, precio: 48 },
-    ],
-    subtotal: 96,
-    costo_envio: 20,
-    total: 116,
-  },
-];
+const STORAGE_KEY = 'donideli_buyer_orders';
+const COSTO_ENVIO_DEFAULT = 20;
 
 @Injectable({ providedIn: 'root' })
 export class BuyerOrdersService {
-  private readonly pedidos = signal<BuyerOrder[]>([...MOCK_ORDERS]);
+  private readonly pedidos = signal<BuyerOrder[]>(this.loadFromStorage());
 
   readonly items = this.pedidos.asReadonly();
-
   readonly total_pedidos = computed(() => this.pedidos().length);
+
+  crear_pedido(input: {
+    id_colaborador: string;
+    email_colaborador: string;
+    nombre_colaborador: string;
+    fecha_entrega: string;
+    horario_entrega: string;
+    lineas: BuyerOrderLine[];
+  }): BuyerOrder {
+    const subtotal = input.lineas.reduce((s, l) => s + l.precio * l.cantidad, 0);
+    const pedido: BuyerOrder = {
+      id_pedido: this.generarId(),
+      id_colaborador: input.id_colaborador,
+      email_colaborador: input.email_colaborador,
+      fecha_creacion: new Date().toISOString(),
+      fecha_entrega: input.fecha_entrega,
+      horario_entrega: input.horario_entrega,
+      estado: 'pendiente',
+      lineas: input.lineas,
+      nombre_colaborador: input.nombre_colaborador,
+      subtotal,
+      costo_envio: COSTO_ENVIO_DEFAULT,
+      total: subtotal + COSTO_ENVIO_DEFAULT,
+    };
+
+    this.pedidos.update((prev) => [pedido, ...prev]);
+    this.persist();
+    return pedido;
+  }
 
   cancelar(id_pedido: string): boolean {
     const list = this.pedidos();
@@ -99,6 +71,7 @@ export class BuyerOrdersService {
     const next = [...list];
     next[idx] = { ...order, estado: 'cancelado' };
     this.pedidos.set(next);
+    this.persist();
     return true;
   }
 
@@ -111,6 +84,7 @@ export class BuyerOrdersService {
     const next = [...list];
     next[idx] = { ...order, fecha_entrega: nueva_fecha, horario_entrega: nuevo_horario };
     this.pedidos.set(next);
+    this.persist();
     return true;
   }
 
@@ -132,5 +106,29 @@ export class BuyerOrdersService {
       '18-20': 'Noche (18:00 – 20:00)',
     };
     return map[horario] ?? horario;
+  }
+
+  private loadFromStorage(): BuyerOrder[] {
+    if (typeof localStorage === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private persist(): void {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.pedidos()));
+    } catch { /* storage full */ }
+  }
+
+  private generarId(): string {
+    const num = Math.floor(Math.random() * 900000) + 100000;
+    return `PED-${num}`;
   }
 }

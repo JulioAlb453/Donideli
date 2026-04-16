@@ -109,12 +109,17 @@
         <button
           type="button"
           class="relative rounded-full p-2 text-primary-600 transition hover:bg-primary-100"
-          aria-label="Notificaciones"
+          aria-label="Mensajes de compradores"
+          (click)="toggle_chat()"
         >
-          <span class="text-lg" aria-hidden="true">🔔</span>
-          <span
-            class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-secondary-500 ring-2 ring-white"
-          ></span>
+          <span class="material-symbols-rounded text-xl" aria-hidden="true">chat</span>
+          @if (adminChat.total_no_leidos() > 0) {
+            <span
+              class="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white"
+            >
+              {{ adminChat.total_no_leidos() }}
+            </span>
+          }
         </button>
         <button
           type="button"
@@ -299,3 +304,7 @@
     </main>
   </div>
 </div>
+
+@if (chat_panel_abierto()) {
+  <app-admin-chat-panel (closed)="cerrar_chat()" />
+}

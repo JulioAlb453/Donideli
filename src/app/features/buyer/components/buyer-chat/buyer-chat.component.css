@@ -1,0 +1,37 @@
+:host {
+  display: contents;
+}
+
+.chat-panel {
+  height: min(28rem, calc(100vh - 10rem));
+}
+
+.chat-messages {
+  scrollbar-width: thin;
+  scrollbar-color: #e7e5e4 transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background-color: #d6d3d1;
+  border-radius: 9999px;
+}
+
+.chat-fab {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.chat-fab:hover {
+  transform: scale(1.08);
+}
+
+.chat-fab--active {
+  background-color: #78716c;
+}

@@ -1,0 +1,173 @@
+<div
+  class="admin-chat-overlay fixed inset-0 z-40 bg-primary-900/30 backdrop-blur-sm md:hidden"
+  (click)="cerrar()"
+></div>
+
+<aside
+  class="admin-chat-sidebar fixed right-0 top-0 z-50 flex h-full w-80 flex-col border-l border-primary-200 bg-white shadow-2xl md:w-96"
+>
+  <!-- Header -->
+  <div class="flex items-center gap-3 border-b border-primary-200 bg-primary-900 px-4 py-4">
+    @if (chat.room_activo()) {
+      <button
+        type="button"
+        class="rounded-lg p-1 text-primary-300 transition hover:bg-primary-800 hover:text-white"
+        (click)="volver()"
+        aria-label="Volver a conversaciones"
+      >
+        <span class="material-symbols-rounded text-xl">arrow_back</span>
+      </button>
+    }
+    <div class="min-w-0 flex-1">
+      <p class="font-heading truncate text-sm text-white">
+        @if (chat.room_activo(); as room) {
+          Chat
+        } @else {
+          Mensajes
+        }
+      </p>
+      <p class="font-body text-xs text-primary-400">
+        @if (chat.conectado()) {
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>
+          Conectado
+        } @else {
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-primary-500" aria-hidden="true"></span>
+          Conectando…
+        }
+      </p>
+    </div>
+    <button
+      type="button"
+      class="rounded-lg p-1.5 text-primary-300 transition hover:bg-primary-800 hover:text-white"
+      (click)="cerrar()"
+      aria-label="Cerrar panel de chat"
+    >
+      <span class="material-symbols-rounded text-xl">close</span>
+    </button>
+  </div>
+
+  @if (!chat.room_activo()) {
+    <!-- Lista de conversaciones -->
+    <div class="flex-1 overflow-y-auto">
+      @if (chat.conversaciones_list().length === 0) {
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+          <span class="material-symbols-rounded text-5xl text-primary-200" aria-hidden="true">forum</span>
+          <p class="font-body mt-3 text-sm text-primary-400">Sin conversaciones activas</p>
+          <p class="font-body mt-1 text-xs text-primary-300">
+            Los mensajes de compradores aparecerán aquí
+          </p>
+        </div>
+      } @else {
+        <ul class="divide-y divide-primary-100" role="list">
+          @for (conv of chat.conversaciones_list(); track conv.room) {
+            <li>
+              <button
+                type="button"
+                class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-primary-50"
+                (click)="abrir(conv.room)"
+              >
+                <span
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-400 font-heading text-sm font-bold text-white"
+                >
+                  {{ inicial(conv.buyer_id) }}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="font-heading truncate text-sm text-primary-900">
+                      {{ nombre_corto(conv.buyer_id) }}
+                    </p>
+                    @if (conv.mensajes.length > 0) {
+                      <span class="font-body shrink-0 text-[10px] text-primary-400">
+                        {{ formato_hora(conv.mensajes[conv.mensajes.length - 1].timestamp) }}
+                      </span>
+                    }
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="font-body truncate text-xs text-primary-500">
+                      @if (conv.mensajes.length > 0) {
+                        {{ conv.mensajes[conv.mensajes.length - 1].propio ? 'Tú: ' : '' }}{{ conv.mensajes[conv.mensajes.length - 1].texto }}
+                      } @else {
+                        Sin mensajes
+                      }
+                    </p>
+                    @if (conv.no_leidos > 0) {
+                      <span
+                        class="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-secondary-500 px-1 text-[10px] font-bold text-white"
+                      >
+                        {{ conv.no_leidos }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  } @else {
+    <!-- Conversación activa -->
+    <div
+      #msgScroll
+      class="admin-chat-messages flex-1 space-y-3 overflow-y-auto px-4 py-4"
+    >
+      @if (chat.mensajes_activos().length === 0) {
+        <div class="py-12 text-center">
+          <span class="material-symbols-rounded text-4xl text-primary-200" aria-hidden="true">chat_bubble</span>
+          <p class="font-body mt-2 text-sm text-primary-400">Inicio de la conversación</p>
+        </div>
+      }
+
+      @for (msg of chat.mensajes_activos(); track msg.timestamp) {
+        <div
+          class="flex"
+          [class.justify-end]="msg.propio"
+          [class.justify-start]="!msg.propio"
+        >
+          <div
+            class="max-w-[75%] rounded-2xl px-3.5 py-2 text-sm shadow-sm"
+            [class.bg-primary-800]="msg.propio"
+            [class.text-white]="msg.propio"
+            [class.rounded-br-md]="msg.propio"
+            [class.bg-primary-100]="!msg.propio"
+            [class.text-primary-900]="!msg.propio"
+            [class.rounded-bl-md]="!msg.propio"
+          >
+            <p class="font-body whitespace-pre-wrap break-words">{{ msg.texto }}</p>
+            <p
+              class="mt-1 text-right text-[10px]"
+              [class.text-primary-400]="msg.propio"
+              [class.text-primary-400]="!msg.propio"
+            >
+              {{ formato_hora(msg.timestamp) }}
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input -->
+    <div class="border-t border-primary-200 bg-white px-3 py-3">
+      <div class="flex items-center gap-2">
+        <input
+          type="text"
+          class="font-body flex-1 rounded-xl border border-primary-200 bg-primary-50/50 px-3 py-2.5 text-sm text-primary-900 placeholder:text-primary-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+          placeholder="Responder…"
+          [value]="texto()"
+          (input)="onInput($event)"
+          (keydown)="onKeydown($event)"
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-800 text-white transition hover:bg-primary-900 disabled:opacity-40"
+          (click)="enviar()"
+          [disabled]="!texto().trim()"
+          aria-label="Enviar"
+        >
+          <span class="material-symbols-rounded text-lg">send</span>
+        </button>
+      </div>
+    </div>
+  }
+</aside>

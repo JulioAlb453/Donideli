@@ -75,8 +75,16 @@
               Entrega: {{ formato_fecha_corta(pedido.fecha_entrega) }} · {{ orders.etiqueta_horario(pedido.horario_entrega) }}
             </div>
 
-            @if (puede_modificar(pedido)) {
-              <div class="mt-4 flex flex-wrap gap-2 border-t border-primary-50 pt-3">
+            <div class="mt-4 flex flex-wrap gap-2 border-t border-primary-50 pt-3">
+              <button
+                type="button"
+                class="font-body inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-white px-3 py-1.5 text-xs text-sky-700 transition hover:bg-sky-50"
+                (click)="abrir_chat(pedido); $event.stopPropagation()"
+              >
+                <span class="material-symbols-rounded text-sm" aria-hidden="true">chat</span>
+                Chatear
+              </button>
+              @if (puede_modificar(pedido)) {
                 <button
                   type="button"
                   class="font-body inline-flex items-center gap-1.5 rounded-xl border border-primary-200 bg-white px-3 py-1.5 text-xs text-primary-800 transition hover:border-secondary-400 hover:text-secondary-500"
@@ -93,8 +101,8 @@
                   <span class="material-symbols-rounded text-sm" aria-hidden="true">cancel</span>
                   Cancelar
                 </button>
-              </div>
-            }
+              }
+            </div>
           </li>
         }
       </ul>
@@ -200,6 +208,14 @@
       </dl>
 
       <div class="mt-6 flex flex-col gap-2 border-t border-primary-100 pt-4">
+        <button
+          type="button"
+          class="font-heading inline-flex w-full items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm text-sky-700 transition hover:bg-sky-100"
+          (click)="abrir_chat(pedido)"
+        >
+          <span class="material-symbols-rounded text-base" aria-hidden="true">chat</span>
+          Chatear con {{ pedido.nombre_colaborador }}
+        </button>
         @if (puede_modificar(pedido)) {
           <div class="flex gap-2">
             <button
@@ -230,4 +246,11 @@
       </div>
     </div>
   </div>
+}
+
+@if (chat_target(); as target) {
+  <app-buyer-chat
+    [id_colaborador]="target.id_colaborador"
+    [nombre]="target.nombre"
+  />
 }

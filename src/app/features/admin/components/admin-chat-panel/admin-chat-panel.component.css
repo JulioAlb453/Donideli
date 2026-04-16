@@ -1,0 +1,30 @@
+:host {
+  display: contents;
+}
+
+.admin-chat-sidebar {
+  animation: slideIn 0.25s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+.admin-chat-messages {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d3d1 transparent;
+}
+
+.admin-chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-chat-messages::-webkit-scrollbar-thumb {
+  background-color: #d6d3d1;
+  border-radius: 9999px;
+}

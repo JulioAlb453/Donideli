@@ -3,6 +3,7 @@ import type { Collaborator } from '../../domain/collaborator/collaborator.model'
 export const COLLABORATOR_SEED: Collaborator[] = [
   {
     id: '1',
+    email: 'mariana@donideli.com',
     displayName: 'Mariana Lopez',
     handle: '@maria.donas',
     bio: 'Especialista en donas artesanales con glaseados únicos y rellenos caseros.',
@@ -14,6 +15,7 @@ export const COLLABORATOR_SEED: Collaborator[] = [
   },
   {
     id: '2',
+    email: 'carlos@donideli.com',
     displayName: 'Carlos Mendez',
     handle: '@carlos.galletas',
     bio: 'Galletas con chips de chocolate y recetas de la abuela, horneadas cada mañana.',
@@ -25,6 +27,7 @@ export const COLLABORATOR_SEED: Collaborator[] = [
   },
   {
     id: '3',
+    email: 'ana@donideli.com',
     displayName: 'Ana Ruiz',
     handle: '@ana.bebidas',
     bio: 'Smoothies, cafés fríos y bebidas vegetales para acompañar tu dulce favorito.',
@@ -36,12 +39,25 @@ export const COLLABORATOR_SEED: Collaborator[] = [
   },
   {
     id: '4',
+    email: 'laura@donideli.com',
     displayName: 'Laura Vega',
     handle: '@laura.donas',
     bio: 'Donas veganas y opciones sin gluten con ingredientes locales.',
     specialty: 'donas',
     productCount: 10,
     salesCount: 198,
+    isOnline: true,
+    status: 'active',
+  },
+  {
+    id: 'admin',
+    email: 'admin@donideli.com',
+    displayName: 'Admin DoniDeli',
+    handle: '@admin.donideli',
+    bio: 'Gestión oficial de DoniDeli. Donas, galletas y bebidas directas del equipo fundador.',
+    specialty: 'donas',
+    productCount: 14,
+    salesCount: 530,
     isOnline: true,
     status: 'active',
   },

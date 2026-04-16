@@ -11,12 +11,14 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { AdminProductsPageComponent } from './pages/products/admin-products-page.component';
 import { AdminGlobalSalesPageComponent } from './pages/global-sales/admin-global-sales-page.component';
 import { AdminFutureUpdatesPageComponent } from './pages/future-updates/admin-future-updates-page.component';
+import { AdminChatPanelComponent } from './components/admin-chat-panel/admin-chat-panel.component';
 
 @NgModule({
   declarations: [
     AdminProductsPageComponent,
     AdminGlobalSalesPageComponent,
     AdminFutureUpdatesPageComponent,
+    AdminChatPanelComponent,
   ],
   imports: [CommonModule, SharedModule, AdminRoutingModule],
   providers: [

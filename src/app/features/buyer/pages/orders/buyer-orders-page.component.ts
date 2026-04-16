@@ -1,7 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { BuyerOrdersService, type BuyerOrder } from '../../services/buyer-orders.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import Swal from 'sweetalert2';
+
+interface ChatTarget {
+  id_colaborador: string;
+  nombre: string;
+}
 
 @Component({
   selector: 'app-buyer-orders-page',
@@ -14,6 +19,8 @@ export class BuyerOrdersPageComponent {
   private readonly notificacion = inject(NotificationService);
 
   protected readonly detalle_abierto = signal<BuyerOrder | null>(null);
+  protected readonly chat_target = signal<ChatTarget | null>(null);
+  protected readonly chat_abierto = computed(() => this.chat_target() !== null);
 
   protected readonly fecha_minima = new Date().toISOString().slice(0, 10);
 
@@ -98,6 +105,18 @@ export class BuyerOrdersPageComponent {
     } else {
       await this.notificacion.error('Error', 'No se pudo reagendar el pedido.');
     }
+  }
+
+  protected abrir_chat(pedido: BuyerOrder): void {
+    this.detalle_abierto.set(null);
+    this.chat_target.set({
+      id_colaborador: pedido.email_colaborador || pedido.id_colaborador,
+      nombre: pedido.nombre_colaborador,
+    });
+  }
+
+  protected cerrar_chat(): void {
+    this.chat_target.set(null);
   }
 
   protected formato_fecha(iso: string): string {

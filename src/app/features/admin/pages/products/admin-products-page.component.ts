@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
@@ -10,6 +10,7 @@ import {
 import type { AdminProduct } from '../../../../core/domain/admin-product/admin-product.model';
 import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-category-ui';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { AdminChatService } from '../../services/admin-chat.service';
 
 @Component({
   selector: 'app-admin-products-page',
@@ -17,7 +18,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
   templateUrl: './admin-products-page.component.html',
   styleUrl: './admin-products-page.component.css',
 })
-export class AdminProductsPageComponent {
+export class AdminProductsPageComponent implements OnInit, OnDestroy {
   @ViewChild('productTrack', { read: ElementRef })
   private readonly productTrack?: ElementRef<HTMLElement>;
 
@@ -25,6 +26,27 @@ export class AdminProductsPageComponent {
   private readonly router = inject(Router);
   private readonly getAllAdminProducts = inject(GetAllAdminProductsUseCase);
   private readonly notificacion = inject(NotificationService);
+  protected readonly adminChat = inject(AdminChatService);
+  protected readonly chat_panel_abierto = signal(false);
+
+  ngOnInit(): void {
+    void this.adminChat.conectar().then(() => {
+      this.adminChat.entrar_room('comprador@donideli.com');
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.adminChat.desconectar();
+  }
+
+  protected toggle_chat(): void {
+    this.chat_panel_abierto.update((v) => !v);
+  }
+
+  protected cerrar_chat(): void {
+    this.chat_panel_abierto.set(false);
+    this.adminChat.cerrar_conversacion();
+  }
 
   private readonly allProducts = toSignal(this.getAllAdminProducts.execute(), {
     initialValue: [] as AdminProduct[],

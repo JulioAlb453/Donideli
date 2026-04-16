@@ -135,7 +135,21 @@
       </div>
     </section>
 
-    <div class="mt-8 flex justify-center">
+    <div class="mt-8 flex flex-col items-center gap-3">
+      <button
+        type="button"
+        class="font-heading flex w-full max-w-sm items-center justify-center gap-2.5 rounded-2xl bg-secondary-400 px-6 py-3.5 text-lg text-white shadow-md transition hover:bg-secondary-500 disabled:opacity-50"
+        [disabled]="confirmando()"
+        (click)="confirmar_pedido()"
+      >
+        @if (confirmando()) {
+          <span class="material-symbols-rounded animate-spin text-xl" aria-hidden="true">progress_activity</span>
+          Procesando…
+        } @else {
+          <span class="material-symbols-rounded text-xl" aria-hidden="true">check_circle</span>
+          Confirmar pedido
+        }
+      </button>
       <button
         type="button"
         class="font-heading inline-flex items-center gap-2 rounded-xl border-2 border-secondary-400 bg-white px-6 py-3 text-secondary-500 transition hover:bg-secondary-50"

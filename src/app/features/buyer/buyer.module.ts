@@ -15,6 +15,7 @@ import { BuyerCartPageComponent } from './pages/cart/buyer-cart-page.component';
 import { BuyerCheckoutDatosPageComponent } from './pages/checkout/buyer-checkout-datos-page.component';
 import { BuyerCheckoutPagoPageComponent } from './pages/checkout/buyer-checkout-pago-page.component';
 import { BuyerOrdersPageComponent } from './pages/orders/buyer-orders-page.component';
+import { BuyerChatComponent } from './components/buyer-chat/buyer-chat.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { BuyerOrdersPageComponent } from './pages/orders/buyer-orders-page.compo
     BuyerCheckoutDatosPageComponent,
     BuyerCheckoutPagoPageComponent,
     BuyerOrdersPageComponent,
+    BuyerChatComponent,
   ],
   imports: [CommonModule, FormsModule, SharedModule, BuyerRoutingModule],
   providers: [

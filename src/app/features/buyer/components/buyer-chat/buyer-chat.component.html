@@ -1,0 +1,125 @@
+<!-- Botón flotante -->
+<button
+  type="button"
+  class="chat-fab fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-secondary-400 text-white shadow-lg transition hover:bg-secondary-500 hover:shadow-xl"
+  [class.chat-fab--active]="abierto()"
+  (click)="toggle()"
+  aria-label="Abrir chat"
+>
+  <span class="material-symbols-rounded text-2xl" aria-hidden="true">
+    {{ abierto() ? 'close' : 'chat' }}
+  </span>
+
+  @if (!abierto() && chat.total_mensajes() > 0) {
+    <span
+      class="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+    >
+      {{ chat.total_mensajes() }}
+    </span>
+  }
+</button>
+
+<!-- Panel de chat -->
+@if (abierto()) {
+  <div
+    class="chat-panel fixed bottom-24 right-6 z-50 flex w-80 flex-col overflow-hidden rounded-3xl border border-primary-100 bg-white shadow-2xl ring-1 ring-primary-50 md:w-96"
+    role="dialog"
+    aria-label="Chat con colaborador"
+  >
+    <!-- Header -->
+    <div class="flex items-center gap-3 border-b border-primary-100 bg-secondary-300/80 px-4 py-3">
+      <span
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-400 text-sm font-bold text-white"
+        aria-hidden="true"
+      >
+        {{ nombre.charAt(0) }}
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="font-heading truncate text-sm text-primary-900">{{ nombre }}</p>
+        <p class="font-body text-xs text-primary-600">
+          @if (chat.conectado()) {
+            <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+            En línea
+          } @else {
+            <span class="inline-block h-1.5 w-1.5 rounded-full bg-primary-300" aria-hidden="true"></span>
+            Conectando…
+          }
+        </p>
+      </div>
+      <button
+        type="button"
+        class="rounded-full p-1.5 text-primary-600 transition hover:bg-white/50 hover:text-primary-900"
+        (click)="cerrar()"
+        aria-label="Cerrar chat"
+      >
+        <span class="material-symbols-rounded text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Mensajes -->
+    <div
+      #scrollContainer
+      class="chat-messages flex-1 space-y-3 overflow-y-auto px-4 py-4"
+    >
+      @if (chat.mensajes().length === 0) {
+        <div class="py-12 text-center">
+          <span class="material-symbols-rounded text-4xl text-primary-200" aria-hidden="true">forum</span>
+          <p class="font-body mt-2 text-sm text-primary-400">
+            Inicia la conversación con {{ nombre }}
+          </p>
+        </div>
+      }
+
+      @for (msg of chat.mensajes(); track msg.timestamp) {
+        <div
+          class="flex"
+          [class.justify-end]="msg.propio"
+          [class.justify-start]="!msg.propio"
+        >
+          <div
+            class="max-w-[75%] rounded-2xl px-3.5 py-2 text-sm shadow-sm"
+            [class.bg-secondary-400]="msg.propio"
+            [class.text-white]="msg.propio"
+            [class.rounded-br-md]="msg.propio"
+            [class.bg-primary-100]="!msg.propio"
+            [class.text-primary-900]="!msg.propio"
+            [class.rounded-bl-md]="!msg.propio"
+          >
+            <p class="font-body whitespace-pre-wrap break-words">{{ msg.texto }}</p>
+            <p
+              class="mt-1 text-right text-[10px]"
+              [class.text-white/70]="msg.propio"
+              [class.text-primary-400]="!msg.propio"
+            >
+              {{ formato_hora(msg.timestamp) }}
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input -->
+    <div class="border-t border-primary-100 bg-white px-3 py-3">
+      <div class="flex items-center gap-2">
+        <input
+          type="text"
+          class="font-body flex-1 rounded-xl border border-primary-200 bg-primary-50/50 px-3 py-2.5 text-sm text-primary-900 placeholder:text-primary-400 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+          placeholder="Escribe un mensaje…"
+          [value]="texto_input()"
+          (input)="onInput($event)"
+          (keydown)="onKeydown($event)"
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary-400 text-white transition hover:bg-secondary-500 disabled:opacity-40"
+          (click)="enviar()"
+          [disabled]="!texto_input().trim()"
+          aria-label="Enviar mensaje"
+        >
+          <span class="material-symbols-rounded text-lg">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
