@@ -2,34 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { App } from './app';
 import { routes } from './app-routing-module';
-import { CollaboratorRepositoryPort } from './core/domain/collaborator/collaborator.repository.port';
-import { CollaboratorInMemoryRepository } from './core/infrastructure/collaborators/collaborator-in-memory.repository';
-import { HomeComponent } from './features/home/home.component';
-import { BuyerNavbarComponent } from './features/buyer/components/buyer-navbar/buyer-navbar.component';
-import { CollaboratorCardComponent } from './features/buyer/components/collaborator-card/collaborator-card.component';
-import { BuyerCollaboratorsPageComponent } from './features/buyer/pages/collaborators/buyer-collaborators-page.component';
-import { BuyerCollaboratorMenuPageComponent } from './features/buyer/pages/collaborator-menu/buyer-collaborator-menu-page.component';
-import { FlaticonIconComponent } from './shared/ui/flaticon-icon/flaticon-icon.component';
+import { AuthSessionService } from './core/application/auth/auth-session.service';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterModule.forRoot(routes)],
-      declarations: [
-        App,
-        HomeComponent,
-        FlaticonIconComponent,
-        BuyerNavbarComponent,
-        CollaboratorCardComponent,
-        BuyerCollaboratorsPageComponent,
-        BuyerCollaboratorMenuPageComponent,
-      ],
-      providers: [
-        {
-          provide: CollaboratorRepositoryPort,
-          useClass: CollaboratorInMemoryRepository,
-        },
-      ],
+      declarations: [App],
     }).compileComponents();
   });
 
@@ -39,10 +18,18 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render marca en el hero', async () => {
+  it('should render marca en el hero para comprador autenticado', async () => {
     const fixture = TestBed.createComponent(App);
     const router = TestBed.inject(Router);
-    await router.navigateByUrl('/');
+    const auth = TestBed.inject(AuthSessionService);
+
+    auth.hydrateForTests({
+      email: 'comprador@donideli.com',
+      displayName: 'Comprador DoniDeli',
+      role: 'buyer',
+    });
+
+    await router.navigateByUrl('/buyer/inicio');
     fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;

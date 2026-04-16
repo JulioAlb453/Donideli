@@ -1,0 +1,18 @@
+{
+  "framework": "angular",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist/donideli/browser",
+  "functions": {
+    "api/ssr.js": {
+      "memory": 1024,
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!api|.*\\..*).*)",
+      "destination": "/api/ssr"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+:host {
+  display: contents;
+}
+
+.admin-mobile-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.admin-mobile-drawer {
+  animation: slideInLeft 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}

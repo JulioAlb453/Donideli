@@ -1,17 +1,30 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './features/home/home.component';
-import { BuyerCollaboratorsPageComponent } from './features/buyer/pages/collaborators/buyer-collaborators-page.component';
-import { BuyerCollaboratorMenuPageComponent } from './features/buyer/pages/collaborator-menu/buyer-collaborator-menu-page.component';
+import {
+  adminRoleGuard,
+  buyerRoleGuard,
+} from './core/presentation/guards/auth-role.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', component: HomeComponent },
-  { path: 'buyer/colaboradores', component: BuyerCollaboratorsPageComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
   {
-    path: 'buyer/colaborador/:id/menu',
-    component: BuyerCollaboratorMenuPageComponent,
+    path: 'login',
+    loadChildren: () =>
+      import('./features/auth/auth.module').then((m) => m.AuthModule),
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: 'buyer',
+    loadChildren: () =>
+      import('./features/buyer/buyer.module').then((m) => m.BuyerModule),
+    canActivate: [buyerRoleGuard],
+  },
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./features/admin/admin.module').then((m) => m.AdminModule),
+    canActivate: [adminRoleGuard],
+  },
+  { path: '**', redirectTo: 'login' },
 ];
 
 @NgModule({

@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
+import { BuyerCartService } from '../../services/buyer-cart.service';
 
 @Component({
   selector: 'app-buyer-navbar',
@@ -7,6 +10,9 @@ import { Component } from '@angular/core';
   styleUrl: './buyer-navbar.component.css',
 })
 export class BuyerNavbarComponent {
+  private readonly authSession = inject(AuthSessionService);
+  private readonly router = inject(Router);
+  protected readonly cart = inject(BuyerCartService);
 
   protected readonly rlaNav = [
     'font-semibold',
@@ -15,4 +21,9 @@ export class BuyerNavbarComponent {
     'decoration-2',
     'underline-offset-4',
   ];
+
+  protected logout(): void {
+    this.authSession.logout();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
 }

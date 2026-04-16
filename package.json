@@ -14,7 +14,7 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "node scripts/render-spa-server.mjs",
     "build": "ng build",
     "build:render": "ng build --configuration=production-static",
     "start:render": "node scripts/render-spa-server.mjs",
@@ -35,6 +35,7 @@
     "@angular/ssr": "^21.2.0",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.26.24",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

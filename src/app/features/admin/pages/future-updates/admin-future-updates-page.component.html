@@ -1,0 +1,59 @@
+<div class="admin-layout flex min-h-screen flex-col bg-primary-50">
+  <app-admin-sidebar (logoutClick)="logout()" />
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header
+      class="sticky top-0 z-10 border-b border-primary-200 bg-white/95 px-4 py-4 backdrop-blur md:px-8"
+    >
+      <h1 class="font-heading text-lg text-primary-900 md:text-xl">Próximas actualizaciones</h1>
+    </header>
+
+    <main class="flex-1 px-4 py-8 md:px-8">
+      <div
+        class="mx-auto max-w-2xl rounded-3xl border border-primary-100 bg-white p-8 shadow-md ring-1 ring-primary-50 md:p-10"
+      >
+        <div
+          class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary-100 text-3xl text-secondary-600"
+          aria-hidden="true"
+        >
+          ✨
+        </div>
+        <h2 class="font-heading text-2xl text-primary-900 md:text-3xl">Actualización general en preparación</h2>
+        <p class="font-body mt-3 text-primary-600">
+          Esta pantalla anticipa la próxima entrega global de DoniDeli para administradores. El contenido es
+          orientativo y puede cambiar según prioridades del producto.
+        </p>
+
+        <div class="mt-8 rounded-2xl border border-dashed border-secondary-200 bg-secondary-50/40 p-5 md:p-6">
+          <p class="font-heading text-sm uppercase tracking-wide text-secondary-700">En roadmap</p>
+          <ul class="font-body mt-4 list-disc space-y-2 pl-5 text-primary-800">
+            <li>Informes exportables y filtros avanzados en ventas globales</li>
+            <li>Gestión de postulantes y altas de colaboradores desde el panel</li>
+            <li>Ajustes de cuenta, roles y notificaciones centralizadas</li>
+            <li>API en vivo para catálogo y pedidos (sustitución de datos demo)</li>
+          </ul>
+        </div>
+
+        <p class="font-body mt-6 text-sm text-primary-500">
+          Cuando publiquemos la actualización, verás los cambios aquí y en el resto del panel. Mientras tanto puedes
+          seguir usando productos y ventas globales.
+        </p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a
+            routerLink="/admin/productos"
+            class="font-heading inline-flex items-center justify-center rounded-xl bg-secondary-400 px-5 py-2.5 text-sm text-white no-underline shadow-sm transition hover:bg-secondary-500"
+          >
+            Ir a productos
+          </a>
+          <a
+            routerLink="/admin/ventas-globales"
+            class="font-heading inline-flex items-center justify-center rounded-xl border border-primary-200 bg-white px-5 py-2.5 text-sm text-primary-800 no-underline transition hover:bg-primary-50"
+          >
+            Ver ventas globales
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

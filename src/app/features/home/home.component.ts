@@ -1,4 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthSessionService } from '../../core/application/auth/auth-session.service';
 import type { CollaboratorCategory } from '../../core/domain/collaborator/collaborator.model';
 import type { FlaticonIconName } from '../../shared/ui/flaticon-icon/flaticon-icons.config';
 
@@ -16,6 +18,9 @@ export interface CategoryCard {
   styleUrl: './home.component.css',
 })
 export class HomeComponent {
+  private readonly authSession = inject(AuthSessionService);
+  private readonly router = inject(Router);
+
   protected readonly tagline = 'Sacia tu antojo';
 
   protected readonly categories: CategoryCard[] = [
@@ -48,5 +53,10 @@ export class HomeComponent {
   protected setPromoSlide(index: number): void {
     const safe = Math.max(0, Math.min(index, this.promoSlideCount - 1));
     this.promoSlideIndex.set(safe);
+  }
+
+  protected logout(): void {
+    this.authSession.logout();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 }
