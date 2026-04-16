@@ -5,6 +5,6 @@
   "buildCommand": "pnpm build:render",
   "outputDirectory": "dist/donideli/browser",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.csr.html" }
   ]
 }
