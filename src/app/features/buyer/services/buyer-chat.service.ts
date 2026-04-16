@@ -16,9 +16,9 @@ interface WSIncoming {
   data?: { texto: string; timestamp: number };
 }
 
-const WS_BASE = 'localhost:8080';
-const TOKEN_URL = `http://${WS_BASE}/auth/token`;
-const WS_URL = `ws://${WS_BASE}/ws`;
+const WS_BASE = 'wb-donideli.fly.dev';
+const TOKEN_URL = `https://${WS_BASE}/auth/token`;
+const WS_URL = `wss://${WS_BASE}/ws`;
 const RECONNECT_DELAY = 3000;
 
 @Injectable({ providedIn: 'root' })
