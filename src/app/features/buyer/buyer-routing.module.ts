@@ -6,6 +6,7 @@ import { BuyerCollaboratorMenuPageComponent } from './pages/collaborator-menu/bu
 import { BuyerCartPageComponent } from './pages/cart/buyer-cart-page.component';
 import { BuyerCheckoutDatosPageComponent } from './pages/checkout/buyer-checkout-datos-page.component';
 import { BuyerCheckoutPagoPageComponent } from './pages/checkout/buyer-checkout-pago-page.component';
+import { BuyerOrdersPageComponent } from './pages/orders/buyer-orders-page.component';
 
 const routes: Routes = [
   { path: 'inicio', component: HomeComponent },
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path: 'carrito', component: BuyerCartPageComponent },
   { path: 'checkout/datos', component: BuyerCheckoutDatosPageComponent },
   { path: 'checkout/pago', component: BuyerCheckoutPagoPageComponent },
+  { path: 'pedidos', component: BuyerOrdersPageComponent },
 ];
 
 @NgModule({
