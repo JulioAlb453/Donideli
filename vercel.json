@@ -1,18 +1,10 @@
 {
-  "framework": "angular",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm build",
+  "buildCommand": "pnpm build:render",
   "outputDirectory": "dist/donideli/browser",
-  "functions": {
-    "api/ssr.js": {
-      "memory": 1024,
-      "maxDuration": 15
-    }
-  },
   "rewrites": [
-    {
-      "source": "/((?!api|.*\\..*).*)",
-      "destination": "/api/ssr"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
