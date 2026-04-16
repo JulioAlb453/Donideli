@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
@@ -9,6 +9,8 @@ import {
 } from '../../../../core/domain/admin-product/admin-product-filter';
 import type { AdminProduct } from '../../../../core/domain/admin-product/admin-product.model';
 import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-category-ui';
+import { NotificationService } from '../../../../shared/services/notification.service';
+import { AdminChatService } from '../../services/admin-chat.service';
 
 @Component({
   selector: 'app-admin-products-page',
@@ -16,13 +18,35 @@ import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-cat
   templateUrl: './admin-products-page.component.html',
   styleUrl: './admin-products-page.component.css',
 })
-export class AdminProductsPageComponent {
+export class AdminProductsPageComponent implements OnInit, OnDestroy {
   @ViewChild('productTrack', { read: ElementRef })
   private readonly productTrack?: ElementRef<HTMLElement>;
 
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
   private readonly getAllAdminProducts = inject(GetAllAdminProductsUseCase);
+  private readonly notificacion = inject(NotificationService);
+  protected readonly adminChat = inject(AdminChatService);
+  protected readonly chat_panel_abierto = signal(false);
+
+  ngOnInit(): void {
+    void this.adminChat.conectar().then(() => {
+      this.adminChat.entrar_room('comprador@donideli.com');
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.adminChat.desconectar();
+  }
+
+  protected toggle_chat(): void {
+    this.chat_panel_abierto.update((v) => !v);
+  }
+
+  protected cerrar_chat(): void {
+    this.chat_panel_abierto.set(false);
+    this.adminChat.cerrar_conversacion();
+  }
 
   private readonly allProducts = toSignal(this.getAllAdminProducts.execute(), {
     initialValue: [] as AdminProduct[],
@@ -70,22 +94,41 @@ export class AdminProductsPageComponent {
     this.searchQuery.set(v);
   }
 
-  protected onEdit(product: AdminProduct): void {
-    // Reservado: navegación a formulario de edición
-    void product;
+  protected async onEdit(product: AdminProduct): Promise<void> {
+    await this.notificacion.info(
+      'Editar producto',
+      `La edición de "${product.name}" estará disponible próximamente.`,
+    );
   }
 
-  protected onDelete(product: AdminProduct): void {
-    void product;
+  protected async onDelete(product: AdminProduct): Promise<void> {
+    const confirmado = await this.notificacion.confirmar(
+      'Eliminar producto',
+      `¿Estás seguro de eliminar "${product.name}" del catálogo? Esta acción no se puede deshacer.`,
+      'Sí, eliminar',
+    );
+    if (confirmado) {
+      await this.notificacion.exito('Producto eliminado', `"${product.name}" fue eliminado del catálogo.`);
+    }
   }
 
-  protected onNewProduct(): void {
-    // Reservado: alta de producto
+  protected async onNewProduct(): Promise<void> {
+    await this.notificacion.info(
+      'Nuevo producto',
+      'El formulario de alta de productos estará disponible próximamente.',
+    );
   }
 
-  protected logout(): void {
-    this.authSession.logout();
-    void this.router.navigateByUrl('/login', { replaceUrl: true });
+  protected async logout(): Promise<void> {
+    const confirmado = await this.notificacion.confirmar(
+      'Cerrar sesión',
+      '¿Seguro que deseas salir del panel de administración?',
+      'Sí, salir',
+    );
+    if (confirmado) {
+      this.authSession.logout();
+      void this.router.navigateByUrl('/login', { replaceUrl: true });
+    }
   }
 
   protected scrollProducts(direction: -1 | 1): void {

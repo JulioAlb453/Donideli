@@ -3,7 +3,7 @@ import type { Observable } from 'rxjs';
 import { AdminProductRepositoryPort } from '../../domain/admin-product/admin-product.repository.port';
 import type { AdminProduct } from '../../domain/admin-product/admin-product.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class GetAllAdminProductsUseCase {
   constructor(private readonly adminProductRepository: AdminProductRepositoryPort) {}
 

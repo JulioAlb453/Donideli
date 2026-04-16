@@ -4,6 +4,7 @@ export type CollaboratorStatus = 'active' | 'inactive';
 
 export interface Collaborator {
   id: string;
+  email: string;
   displayName: string;
   handle: string;
   bio: string;
