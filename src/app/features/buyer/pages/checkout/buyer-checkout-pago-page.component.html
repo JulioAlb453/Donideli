@@ -1,0 +1,149 @@
+<app-buyer-navbar />
+
+<main class="checkout-pago bg-[#fffdfb] pb-16">
+  <div class="border-b border-secondary-200/80 bg-white/90 px-4 py-3 md:px-6">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+      <a
+        routerLink="/buyer/checkout/datos"
+        class="font-body inline-flex items-center gap-1.5 text-sm text-primary-700 no-underline transition hover:text-secondary-500"
+      >
+        <span class="material-symbols-rounded text-base" aria-hidden="true">arrow_back</span>
+        Volver a mis datos
+      </a>
+      <nav
+        class="cart-stepper font-body flex flex-wrap items-center gap-2 text-xs md:gap-4 md:text-sm"
+        aria-label="Pasos de compra"
+      >
+        <span class="flex items-center gap-2 text-primary-500">
+          <span
+            class="flex h-8 w-8 items-center justify-center rounded-full border border-primary-200 bg-white text-primary-600"
+            >1</span
+          >
+          Mi carrito
+        </span>
+        <span class="text-primary-300" aria-hidden="true">—</span>
+        <span class="flex items-center gap-2 text-primary-500">
+          <span
+            class="flex h-8 w-8 items-center justify-center rounded-full border border-primary-200 bg-white text-primary-600"
+            >2</span
+          >
+          Mis datos
+        </span>
+        <span class="text-primary-300" aria-hidden="true">—</span>
+        <span class="flex items-center gap-2 font-semibold text-secondary-500">
+          <span
+            class="cart-stepper__dot--active flex h-8 w-8 items-center justify-center rounded-full bg-secondary-400 text-white"
+            >3</span
+          >
+          Confirmación
+        </span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-xl px-4 py-8 md:py-10">
+    <section class="checkout-pago__card overflow-hidden rounded-3xl shadow-lg ring-1 ring-primary-100">
+      <header class="checkout-pago__header relative px-6 pb-6 pt-5 md:px-8">
+        <p class="checkout-pago__header-label font-body text-xs font-semibold uppercase tracking-widest text-white/80">
+          Transferencia bancaria
+        </p>
+        <h1 class="font-heading mt-2 text-2xl text-white md:text-3xl">{{ vendedor.nombre_vendedor }}</h1>
+        <p class="font-body mt-1 text-sm text-white/90">
+          {{ vendedor.rol }} · {{ vendedor.categoria }}
+        </p>
+      </header>
+
+      <div class="space-y-6 bg-white px-6 py-6 md:px-8">
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <p class="checkout-pago__field-label font-body text-xs font-semibold uppercase tracking-wider text-primary-500">
+              Banco
+            </p>
+            <p class="font-heading mt-1 text-lg text-primary-900">{{ vendedor.banco }}</p>
+          </div>
+          <div>
+            <p class="checkout-pago__field-label font-body text-xs font-semibold uppercase tracking-wider text-primary-500">
+              Tipo de cuenta
+            </p>
+            <p class="font-heading mt-1 text-lg text-primary-900">{{ vendedor.tipo_cuenta }}</p>
+          </div>
+        </div>
+
+        <div>
+          <p class="checkout-pago__field-label font-body text-xs font-semibold uppercase tracking-wider text-primary-500">
+            Número de cuenta
+          </p>
+          <div class="mt-1 flex items-center gap-3">
+            <p class="font-heading text-lg tracking-wider text-primary-900">{{ vendedor.numero_cuenta }}</p>
+            <button
+              type="button"
+              class="checkout-pago__copy-btn inline-flex items-center gap-1 rounded-lg border border-primary-200 bg-white px-2 py-1 text-sm text-primary-600 transition hover:border-secondary-400 hover:text-secondary-500"
+              (click)="copiar_cuenta()"
+            >
+              @if (cuenta_copiada()) {
+                <span class="material-symbols-rounded text-base text-emerald-600" aria-hidden="true">check</span>
+              } @else {
+                <span class="material-symbols-rounded text-base" aria-hidden="true">content_copy</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p class="checkout-pago__field-label font-body text-xs font-semibold uppercase tracking-wider text-primary-500">
+            CLABE interbancaria
+          </p>
+          <div class="mt-1 flex items-center gap-3">
+            <p class="font-heading text-lg tracking-wider text-primary-900">{{ vendedor.clabe }}</p>
+            <button
+              type="button"
+              class="checkout-pago__copy-btn inline-flex items-center gap-1 rounded-lg border border-primary-200 bg-white px-2 py-1 text-sm text-primary-600 transition hover:border-secondary-400 hover:text-secondary-500"
+              (click)="copiar_clabe()"
+            >
+              @if (clabe_copiada()) {
+                <span class="material-symbols-rounded text-base text-emerald-600" aria-hidden="true">check</span>
+              } @else {
+                <span class="material-symbols-rounded text-base" aria-hidden="true">content_copy</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p class="checkout-pago__field-label font-body text-xs font-semibold uppercase tracking-wider text-primary-500">
+            Titular de la cuenta
+          </p>
+          <p class="font-heading mt-1 text-lg text-primary-900">{{ vendedor.titular }}</p>
+        </div>
+      </div>
+
+      <div class="border-t border-primary-100 bg-white px-6 pb-6 pt-5 md:px-8">
+        <div class="flex items-start gap-3 rounded-2xl border border-secondary-100 bg-secondary-50/50 px-4 py-3">
+          <span class="material-symbols-rounded mt-0.5 shrink-0 text-xl text-secondary-500" aria-hidden="true">info</span>
+          <p class="font-body text-sm leading-relaxed text-primary-700">
+            Realiza tu transferencia y envía el comprobante por WhatsApp al vendedor para confirmar tu pedido.
+          </p>
+        </div>
+
+        <a
+          [href]="'tel:' + vendedor.telefono.replace(/\\s/g, '')"
+          class="checkout-pago__phone-btn font-heading mt-5 flex w-full items-center justify-center gap-2.5 rounded-2xl px-6 py-3.5 text-center text-lg text-white no-underline shadow-md transition"
+        >
+          <span class="material-symbols-rounded text-xl" aria-hidden="true">call</span>
+          {{ vendedor.telefono }}
+        </a>
+      </div>
+    </section>
+
+    <div class="mt-8 flex justify-center">
+      <button
+        type="button"
+        class="font-heading inline-flex items-center gap-2 rounded-xl border-2 border-secondary-400 bg-white px-6 py-3 text-secondary-500 transition hover:bg-secondary-50"
+        (click)="volver_a_datos()"
+      >
+        <span class="material-symbols-rounded text-base" aria-hidden="true">arrow_back</span>
+        Volver a mis datos
+      </button>
+    </div>
+  </div>
+</main>

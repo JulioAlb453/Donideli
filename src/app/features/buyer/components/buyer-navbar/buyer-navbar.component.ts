@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
+import { BuyerCartService } from '../../services/buyer-cart.service';
 
 @Component({
   selector: 'app-buyer-navbar',
@@ -11,6 +12,7 @@ import { AuthSessionService } from '../../../../core/application/auth/auth-sessi
 export class BuyerNavbarComponent {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
+  protected readonly cart = inject(BuyerCartService);
 
   protected readonly rlaNav = [
     'font-semibold',

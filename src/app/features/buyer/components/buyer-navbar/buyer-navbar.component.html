@@ -34,6 +34,18 @@
         >Menu</a
       >
       <a
+        routerLink="/buyer/carrito"
+        [routerLinkActive]="rlaNav"
+        class="relative rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        >Carrito
+        @if (cart.cantidad_items() > 0) {
+          <span
+            class="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary-500 px-1 text-[10px] font-bold text-white"
+            >{{ cart.cantidad_items() }}</span
+          >
+        }
+      </a>
+      <a
         routerLink="/buyer/colaboradores"
         [routerLinkActive]="rlaNav"
         class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"

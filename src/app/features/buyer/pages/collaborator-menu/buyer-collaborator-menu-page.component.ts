@@ -2,15 +2,17 @@ import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
-import type { CollaboratorCategory } from '../../../../core/domain/collaborator/collaborator.model';
+import type { Collaborator, CollaboratorCategory } from '../../../../core/domain/collaborator/collaborator.model';
+import { CollaboratorRepositoryPort } from '../../../../core/domain/collaborator/collaborator.repository.port';
 import { collaboratorCategoryToFlaticon } from '../../utils/collaborator-category-ui';
+import { BuyerCartService } from '../../services/buyer-cart.service';
 
 interface MenuProduct {
-  id: string;
-  name: string;
-  description: string;
-  priceMx: number;
-  tags: string[];
+  id_producto: string;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  etiquetas: string[];
 }
 
 @Component({
@@ -21,8 +23,14 @@ interface MenuProduct {
 })
 export class BuyerCollaboratorMenuPageComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
+  private readonly cart = inject(BuyerCartService);
 
-  protected readonly collaboratorId = toSignal(
+  private readonly collaborators = toSignal(this.collaboratorRepo.findAllActive(), {
+    initialValue: [] as Collaborator[],
+  });
+
+  protected readonly id_colaborador = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id'))),
     { initialValue: null },
   );
@@ -53,6 +61,15 @@ export class BuyerCollaboratorMenuPageComponent {
   protected readonly heroIcon = computed(() =>
     collaboratorCategoryToFlaticon(this.selectedCategory()),
   );
+
+  protected readonly nombre_colaborador = computed(() => {
+    const id = this.id_colaborador();
+    const list = this.collaborators();
+    if (!id) {
+      return 'Colaborador';
+    }
+    return list.find((c) => c.id === id)?.displayName ?? 'Colaborador';
+  });
 
   protected readonly productCardTopClass = computed(() => {
     switch (this.selectedCategory()) {
@@ -100,56 +117,68 @@ export class BuyerCollaboratorMenuPageComponent {
   private readonly productsByCategory: Record<CollaboratorCategory, MenuProduct[]> = {
     donas: [
       {
-        id: 'd-1',
-        name: 'Leche Santa Clara',
-        description: 'Dona de vainilla con centro cremoso de chocolate y chispas de colores.',
-        priceMx: 15,
-        tags: ['vainilla', 'chocolate'],
+        id_producto: 'd-1',
+        nombre: 'Leche Santa Clara',
+        descripcion: 'Dona de vainilla con centro cremoso de chocolate y chispas de colores.',
+        precio: 15,
+        etiquetas: ['vainilla', 'chocolate'],
       },
       {
-        id: 'd-2',
-        name: 'Glaseada Rosa',
-        description: 'Masa suave glaseada con cobertura frutal y topping crocante.',
-        priceMx: 17,
-        tags: ['frutal', 'glaseada'],
+        id_producto: 'd-2',
+        nombre: 'Glaseada Rosa',
+        descripcion: 'Masa suave glaseada con cobertura frutal y topping crocante.',
+        precio: 17,
+        etiquetas: ['frutal', 'glaseada'],
       },
     ],
     bebidas: [
       {
-        id: 'b-1',
-        name: 'Frappe de Vainilla',
-        description: 'Bebida fria con crema batida y toque de canela.',
-        priceMx: 55,
-        tags: ['frio', 'cremoso'],
+        id_producto: 'b-1',
+        nombre: 'Frappe de Vainilla',
+        descripcion: 'Bebida fria con crema batida y toque de canela.',
+        precio: 55,
+        etiquetas: ['frio', 'cremoso'],
       },
       {
-        id: 'b-2',
-        name: 'Iced Latte',
-        description: 'Espresso con leche fria, hielo y jarabe ligero.',
-        priceMx: 48,
-        tags: ['cafe', 'hielo'],
+        id_producto: 'b-2',
+        nombre: 'Iced Latte',
+        descripcion: 'Espresso con leche fria, hielo y jarabe ligero.',
+        precio: 48,
+        etiquetas: ['cafe', 'hielo'],
       },
     ],
     galletas: [
       {
-        id: 'g-1',
-        name: 'Cookie Choco Chips',
-        description: 'Galleta grande con chips de chocolate semiamargo.',
-        priceMx: 22,
-        tags: ['choco', 'artesanal'],
+        id_producto: 'g-1',
+        nombre: 'Cookie Choco Chips',
+        descripcion: 'Galleta grande con chips de chocolate semiamargo.',
+        precio: 22,
+        etiquetas: ['choco', 'artesanal'],
       },
       {
-        id: 'g-2',
-        name: 'Avena y Miel',
-        description: 'Textura suave con avena integral y un toque de miel.',
-        priceMx: 20,
-        tags: ['avena', 'miel'],
+        id_producto: 'g-2',
+        nombre: 'Avena y Miel',
+        descripcion: 'Textura suave con avena integral y un toque de miel.',
+        precio: 20,
+        etiquetas: ['avena', 'miel'],
       },
     ],
   };
 
   protected isActiveCategory(category: CollaboratorCategory): boolean {
     return this.selectedCategory() === category;
+  }
+
+  protected agregar_al_carrito(producto: MenuProduct): void {
+    const cid = this.id_colaborador() ?? '0';
+    this.cart.addProduct({
+      id_colaborador: cid,
+      id_producto: producto.id_producto,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      nombre_colaborador: this.nombre_colaborador(),
+      icon: collaboratorCategoryToFlaticon(this.selectedCategory()),
+    });
   }
 
   private parseCategory(raw: string | null): CollaboratorCategory {

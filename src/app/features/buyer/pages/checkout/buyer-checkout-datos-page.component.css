@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.checkout-datos__card {
+  background-color: #fffdfb;
+}
+
+.checkout-datos__input {
+  background-color: #fffdfb;
+}
+
+.checkout-datos__tipo-btn {
+  background-color: #fffdfb;
+}
+
+.checkout-datos__tipo-btn--active {
+  border-color: rgb(244 114 182 / 0.85);
+  background-color: rgb(254 242 248 / 0.5);
+  color: rgb(131 24 67);
+}
+
+.checkout-datos__tipo-btn--active .font-heading {
+  color: rgb(157 23 77);
+}
+
+.checkout-datos__tipo-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.checkout-datos__action-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

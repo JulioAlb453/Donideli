@@ -6,6 +6,18 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'buyer/carrito',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'buyer/checkout/datos',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'buyer/checkout/pago',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'admin/productos',
     renderMode: RenderMode.Client,
   },

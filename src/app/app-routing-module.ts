@@ -3,6 +3,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
 import { BuyerCollaboratorsPageComponent } from './features/buyer/pages/collaborators/buyer-collaborators-page.component';
 import { BuyerCollaboratorMenuPageComponent } from './features/buyer/pages/collaborator-menu/buyer-collaborator-menu-page.component';
+import { BuyerCartPageComponent } from './features/buyer/pages/cart/buyer-cart-page.component';
+import { BuyerCheckoutDatosPageComponent } from './features/buyer/pages/checkout/buyer-checkout-datos-page.component';
+import { BuyerCheckoutPagoPageComponent } from './features/buyer/pages/checkout/buyer-checkout-pago-page.component';
 import { AdminProductsPageComponent } from './features/admin/pages/products/admin-products-page.component';
 import { AdminGlobalSalesPageComponent } from './features/admin/pages/global-sales/admin-global-sales-page.component';
 import { AdminFutureUpdatesPageComponent } from './features/admin/pages/future-updates/admin-future-updates-page.component';
@@ -24,6 +27,21 @@ export const routes: Routes = [
   {
     path: 'buyer/colaborador/:id/menu',
     component: BuyerCollaboratorMenuPageComponent,
+    canActivate: [buyerRoleGuard],
+  },
+  {
+    path: 'buyer/carrito',
+    component: BuyerCartPageComponent,
+    canActivate: [buyerRoleGuard],
+  },
+  {
+    path: 'buyer/checkout/datos',
+    component: BuyerCheckoutDatosPageComponent,
+    canActivate: [buyerRoleGuard],
+  },
+  {
+    path: 'buyer/checkout/pago',
+    component: BuyerCheckoutPagoPageComponent,
     canActivate: [buyerRoleGuard],
   },
   {
