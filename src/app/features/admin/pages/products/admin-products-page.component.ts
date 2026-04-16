@@ -9,6 +9,7 @@ import {
 } from '../../../../core/domain/admin-product/admin-product-filter';
 import type { AdminProduct } from '../../../../core/domain/admin-product/admin-product.model';
 import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-category-ui';
+import { NotificationService } from '../../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-admin-products-page',
@@ -23,6 +24,7 @@ export class AdminProductsPageComponent {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
   private readonly getAllAdminProducts = inject(GetAllAdminProductsUseCase);
+  private readonly notificacion = inject(NotificationService);
 
   private readonly allProducts = toSignal(this.getAllAdminProducts.execute(), {
     initialValue: [] as AdminProduct[],
@@ -70,22 +72,41 @@ export class AdminProductsPageComponent {
     this.searchQuery.set(v);
   }
 
-  protected onEdit(product: AdminProduct): void {
-    // Reservado: navegación a formulario de edición
-    void product;
+  protected async onEdit(product: AdminProduct): Promise<void> {
+    await this.notificacion.info(
+      'Editar producto',
+      `La edición de "${product.name}" estará disponible próximamente.`,
+    );
   }
 
-  protected onDelete(product: AdminProduct): void {
-    void product;
+  protected async onDelete(product: AdminProduct): Promise<void> {
+    const confirmado = await this.notificacion.confirmar(
+      'Eliminar producto',
+      `¿Estás seguro de eliminar "${product.name}" del catálogo? Esta acción no se puede deshacer.`,
+      'Sí, eliminar',
+    );
+    if (confirmado) {
+      await this.notificacion.exito('Producto eliminado', `"${product.name}" fue eliminado del catálogo.`);
+    }
   }
 
-  protected onNewProduct(): void {
-    // Reservado: alta de producto
+  protected async onNewProduct(): Promise<void> {
+    await this.notificacion.info(
+      'Nuevo producto',
+      'El formulario de alta de productos estará disponible próximamente.',
+    );
   }
 
-  protected logout(): void {
-    this.authSession.logout();
-    void this.router.navigateByUrl('/login', { replaceUrl: true });
+  protected async logout(): Promise<void> {
+    const confirmado = await this.notificacion.confirmar(
+      'Cerrar sesión',
+      '¿Seguro que deseas salir del panel de administración?',
+      'Sí, salir',
+    );
+    if (confirmado) {
+      this.authSession.logout();
+      void this.router.navigateByUrl('/login', { replaceUrl: true });
+    }
   }
 
   protected scrollProducts(direction: -1 | 1): void {

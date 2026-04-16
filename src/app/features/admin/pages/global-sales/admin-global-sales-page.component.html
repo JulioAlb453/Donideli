@@ -457,7 +457,22 @@
         </div>
       </dl>
 
-      <div class="mt-8 flex justify-end border-t border-primary-100 pt-4">
+      <div class="mt-6 border-t border-primary-100 pt-4">
+        <p class="font-body mb-3 text-xs font-semibold uppercase tracking-wider text-primary-500">Cambiar estado</p>
+        <div class="flex flex-wrap gap-2">
+          @for (opt of nextStatusOptions(order.status); track opt.id) {
+            <button
+              type="button"
+              class="font-body rounded-full border border-primary-200 bg-white px-3 py-1.5 text-xs text-primary-800 transition hover:border-secondary-400 hover:text-secondary-500"
+              (click)="cambiarEstado(order, opt.id)"
+            >
+              {{ opt.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end border-t border-primary-100 pt-4">
         <button
           type="button"
           class="font-heading rounded-xl border-2 border-secondary-400 bg-white px-6 py-2.5 text-sm text-secondary-500 transition hover:bg-secondary-50"
