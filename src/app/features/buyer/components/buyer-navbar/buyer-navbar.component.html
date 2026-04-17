@@ -25,19 +25,19 @@
         routerLink="/buyer/inicio"
         [routerLinkActive]="rlaNav"
         [routerLinkActiveOptions]="{ exact: true }"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Inicio</a
       >
       <a
         routerLink="/buyer/pedidos"
         [routerLinkActive]="rlaNav"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Mis pedidos</a
       >
       <a
         routerLink="/buyer/carrito"
         [routerLinkActive]="rlaNav"
-        class="relative rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link relative rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Carrito
         @if (cart.cantidad_items() > 0) {
           <span
@@ -49,17 +49,17 @@
       <a
         routerLink="/buyer/colaboradores"
         [routerLinkActive]="rlaNav"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Colaboradores</a
       >
       <a
         href="#"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Promociones</a
       >
       <button
         type="button"
-        class="rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
+        class="doni-press rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
         (click)="logout()"
       >
         Cerrar sesión

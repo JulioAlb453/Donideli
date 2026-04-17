@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { AuthSessionService } from '../../core/application/auth/auth-session.service';
 import type { CollaboratorCategory } from '../../core/domain/collaborator/collaborator.model';
 import type { FlaticonIconName } from '../../shared/ui/flaticon-icon/flaticon-icons.config';
-
 export interface CategoryCard {
   title: string;
   description: string;

@@ -2,7 +2,7 @@
 
 <main class="bg-[#fffdfb] px-4 pb-16 pt-8 md:px-8">
   <div class="mx-auto max-w-6xl">
-    <div class="mb-10 text-center md:text-left">
+    <div class="doni-animate-header mb-10 text-center md:text-left">
       <p
         class="font-body mb-3 inline-block rounded-full bg-secondary-400 px-4 py-1 text-xs font-medium text-white"
       >
@@ -53,9 +53,7 @@
       ></div>
     </div>
 
-    <div
-      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-    >
+    <div class="doni-stagger-children grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       @for (c of filteredCollaborators(); track c.id) {
         <app-collaborator-card [collaborator]="c" />
       }

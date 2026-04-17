@@ -2,7 +2,6 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import type { UserRole } from '../../../../core/domain/auth/auth-user.model';
-
 @Component({
   selector: 'app-login-page',
   standalone: false,
