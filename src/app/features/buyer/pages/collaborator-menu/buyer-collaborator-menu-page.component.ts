@@ -1,15 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import type { Collaborator, CollaboratorCategory } from '../../../../core/domain/collaborator/collaborator.model';
 import { CollaboratorRepositoryPort } from '../../../../core/domain/collaborator/collaborator.repository.port';
 import { collaboratorCategoryToFlaticon } from '../../utils/collaborator-category-ui';
 import { BuyerCartService } from '../../services/buyer-cart.service';
-import {
-  getMenuByCollaborator,
-  type MenuProduct,
-} from '../../../../core/infrastructure/collaborators/collaborator-menu-products.data';
+import { ProductCatalogApiRepository } from '../../../../core/infrastructure/productos/product-catalog-api.repository';
+import type { MenuProduct } from '../../../../core/infrastructure/productos/product-catalog.mapper';
 
 @Component({
   selector: 'app-buyer-collaborator-menu-page',
@@ -21,6 +19,7 @@ export class BuyerCollaboratorMenuPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
   private readonly cart = inject(BuyerCartService);
+  private readonly catalogRepo = inject(ProductCatalogApiRepository);
 
   private readonly collaborators = toSignal(this.collaboratorRepo.findAllActive(), {
     initialValue: [] as Collaborator[],
@@ -96,20 +95,19 @@ export class BuyerCollaboratorMenuPageComponent {
     }
   });
 
-  protected readonly allCollaboratorProducts = computed(() => {
-    const id = this.id_colaborador();
-    if (!id) return [];
-    return getMenuByCollaborator(id);
-  });
-
-  protected readonly products = computed(() =>
-    this.allCollaboratorProducts().filter((p) => p.categoria === this.selectedCategory()),
+  protected readonly allCollaboratorProducts = toSignal(
+    this.route.paramMap.pipe(
+      map((params) => params.get('id')),
+      switchMap((id) => this.catalogRepo.findMenuForCollaborator(id)),
+    ),
+    { initialValue: [] as MenuProduct[] },
   );
 
-  protected readonly availableCategories = computed(() => {
-    const cats = new Set(this.allCollaboratorProducts().map((p) => p.categoria));
-    return this.allCategoryLinks.filter((c) => cats.has(c.id));
-  });
+  protected readonly products = computed(() =>
+    this.allCollaboratorProducts().filter(
+      (p: MenuProduct) => p.categoria === this.selectedCategory(),
+    ),
+  );
 
   private readonly allCategoryLinks: { id: CollaboratorCategory; label: string }[] = [
     { id: 'donas', label: 'Donas' },
@@ -117,7 +115,14 @@ export class BuyerCollaboratorMenuPageComponent {
     { id: 'bebidas', label: 'Bebidas' },
   ];
 
-  protected readonly categoryLinks = this.allCategoryLinks;
+  protected readonly categoryLinks = computed(() => {
+    const catalog = this.allCollaboratorProducts();
+    if (catalog.length === 0) {
+      return this.allCategoryLinks;
+    }
+    const cats = new Set(catalog.map((p: MenuProduct) => p.categoria));
+    return this.allCategoryLinks.filter((c) => cats.has(c.id));
+  });
 
   protected isActiveCategory(category: CollaboratorCategory): boolean {
     return this.selectedCategory() === category;
@@ -132,7 +137,7 @@ export class BuyerCollaboratorMenuPageComponent {
       nombre: producto.nombre,
       precio: producto.precio,
       nombre_colaborador: this.nombre_colaborador(),
-      icon: collaboratorCategoryToFlaticon(this.selectedCategory()),
+      icon: collaboratorCategoryToFlaticon(producto.categoria),
     });
   }
 

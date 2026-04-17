@@ -9,8 +9,9 @@
       <div class="mx-auto mt-5 h-1 w-40 rounded-full bg-secondary-400"></div>
 
       <div class="font-body mt-8 flex flex-wrap justify-center gap-2">
-        @for (cat of categoryLinks; track cat.id) {
-        <a [routerLink]="['/buyer/colaborador', id_colaborador() ?? 'demo', 'menu']"
+        @for (cat of categoryLinks(); track cat.id) {
+        <a
+          [routerLink]="id_colaborador() ? ['/buyer/colaborador', id_colaborador(), 'menu'] : ['/buyer/inicio']"
           [queryParams]="{ category: cat.id }" class="rounded-full border px-4 py-2 text-sm no-underline transition"
           [class.bg-secondary-400]="isActiveCategory(cat.id)" [class.text-white]="isActiveCategory(cat.id)"
           [class.border-transparent]="isActiveCategory(cat.id)" [class.bg-white]="!isActiveCategory(cat.id)"

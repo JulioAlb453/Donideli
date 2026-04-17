@@ -1,7 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSessionService } from '../../core/application/auth/auth-session.service';
-import type { CollaboratorCategory } from '../../core/domain/collaborator/collaborator.model';
+import type { Collaborator, CollaboratorCategory } from '../../core/domain/collaborator/collaborator.model';
+import { CollaboratorRepositoryPort } from '../../core/domain/collaborator/collaborator.repository.port';
 import type { FlaticonIconName } from '../../shared/ui/flaticon-icon/flaticon-icons.config';
 export interface CategoryCard {
   title: string;
@@ -19,6 +21,20 @@ export interface CategoryCard {
 export class HomeComponent {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
+  private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
+
+  private readonly collaborators = toSignal(this.collaboratorRepo.findAllActive(), {
+    initialValue: [] as Collaborator[],
+  });
+
+  /** Primer colaborador del API para enlazar al menú; si no hay datos, ir al área comprador. */
+  protected readonly menuColaboradorBasePath = computed((): string[] => {
+    const first = this.collaborators()[0];
+    if (first?.id) {
+      return ['/buyer', 'colaborador', first.id, 'menu'];
+    }
+    return ['/buyer', 'inicio'];
+  });
 
   protected readonly tagline = 'Sacia tu antojo';
 

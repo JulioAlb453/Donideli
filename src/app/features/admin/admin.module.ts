@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
+import { API_BASE_URL } from '../../core/config/api-base-url.token';
 import { AdminProductRepositoryPort } from '../../core/domain/admin-product/admin-product.repository.port';
-import { AdminProductInMemoryRepository } from '../../core/infrastructure/admin-products/admin-product-in-memory.repository';
+import { AdminProductApiRepository } from '../../core/infrastructure/admin-products/admin-product-api.repository';
 import { AdminOrderRepositoryPort } from '../../core/domain/admin-order/admin-order.repository.port';
-import { AdminOrderInMemoryRepository } from '../../core/infrastructure/admin-orders/admin-order-in-memory.repository';
+import { AdminOrderApiRepository } from '../../core/infrastructure/admin-orders/admin-order-api.repository';
 import { GetAllAdminProductsUseCase } from '../../core/application/admin-products/get-all-admin-products.use-case';
 import { GetAllAdminOrdersUseCase } from '../../core/application/admin-orders/get-all-admin-orders.use-case';
 import { AdminRoutingModule } from './admin-routing.module';
@@ -26,11 +28,12 @@ import { AdminSidebarComponent } from './components/admin-sidebar/admin-sidebar.
   providers: [
     {
       provide: AdminProductRepositoryPort,
-      useClass: AdminProductInMemoryRepository,
+      useFactory: (http: HttpClient, api: string) => new AdminProductApiRepository(http, api),
+      deps: [HttpClient, API_BASE_URL],
     },
     {
       provide: AdminOrderRepositoryPort,
-      useClass: AdminOrderInMemoryRepository,
+      useClass: AdminOrderApiRepository,
     },
     GetAllAdminProductsUseCase,
     GetAllAdminOrdersUseCase,

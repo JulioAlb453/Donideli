@@ -177,6 +177,7 @@
                     <p class="font-heading mt-3 text-xl text-secondary-500">
                       ${{ product.priceMx }} MXN
                     </p>
+                    <p class="font-body mt-1 text-xs text-primary-600">Stock: {{ product.stock }}</p>
                     <p class="font-body mt-1 text-xs text-primary-500">↑ {{ product.salesCount }} vendidas</p>
                     <div class="mt-4 flex gap-2">
                       <button
@@ -205,6 +206,110 @@
     </main>
   </div>
 </div>
+
+@if (modalAbierto()) {
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-primary-900/50 px-4 py-8 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'admin-product-form-title'"
+    (click)="cerrarModal()"
+  >
+    <div
+      class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-primary-100 bg-white p-6 shadow-xl ring-1 ring-primary-50 md:p-8"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="admin-product-form-title" class="font-heading text-xl text-primary-900 md:text-2xl">
+        {{ tituloModal() }}
+      </h2>
+      <p class="font-body mt-1 text-sm text-primary-600">
+        Los datos se guardan en el API. Asigna un colaborador para que el producto aparezca en su menú público.
+      </p>
+
+      <div class="mt-6 space-y-4">
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Nombre</span>
+          <input
+            type="text"
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formNombre()"
+            (input)="onFormNombre($event)"
+            autocomplete="off"
+          />
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Precio (MXN)</span>
+          <input
+            type="text"
+            inputmode="decimal"
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formPrecio()"
+            (input)="onFormPrecio($event)"
+          />
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Stock</span>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formStock()"
+            (input)="onFormStock($event)"
+          />
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Categoría</span>
+          <select
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 bg-white px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formCategoria()"
+            (change)="onFormCategoriaChange($event)"
+          >
+            @for (opt of categoryOptions; track opt.id) {
+              <option [value]="opt.id">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Menú de colaborador (opcional)</span>
+          <select
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 bg-white px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formColaboradorId()"
+            (change)="onFormColaboradorChange($event)"
+          >
+            <option value="">Sin asignar</option>
+            @for (c of collaborators(); track c.id) {
+              <option [value]="c.id">{{ c.displayName }} · {{ c.handle }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <button
+          type="button"
+          class="font-heading flex-1 rounded-xl border border-primary-200 bg-white px-4 py-3 text-sm text-primary-800 transition hover:bg-primary-50 disabled:opacity-50"
+          [disabled]="formEnviando()"
+          (click)="cerrarModal()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="doni-press font-heading flex-1 rounded-xl bg-secondary-400 px-4 py-3 text-sm text-white shadow-sm transition hover:bg-secondary-500 disabled:opacity-50"
+          [disabled]="formEnviando()"
+          (click)="guardarFormulario()"
+        >
+          @if (formEnviando()) {
+            Guardando…
+          } @else {
+            Guardar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
 @if (chat_panel_abierto()) {
   <app-admin-chat-panel (closed)="cerrar_chat()" />

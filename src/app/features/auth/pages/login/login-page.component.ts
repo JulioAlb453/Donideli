@@ -31,15 +31,8 @@ export class LoginPageComponent {
   protected setRole(role: UserRole): void {
     this.role.set(role);
     this.errorMessage.set('');
-
-    if (role === 'buyer') {
-      this.email.set('comprador@donideli.com');
-      this.password.set('buyer123');
-      return;
-    }
-
-    this.email.set('admin@donideli.com');
-    this.password.set('admin123');
+    this.email.set('');
+    this.password.set('');
   }
 
   protected onEmailInput(event: Event): void {

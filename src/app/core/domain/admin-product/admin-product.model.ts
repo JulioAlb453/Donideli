@@ -14,4 +14,22 @@ export interface AdminProduct {
   collaboratorName: string;
   salesCount: number;
   icon: AdminProductCardIcon;
+  stock: number;
+  collaboratorDbId: number | null;
 }
+
+export interface AdminProductCreateBody {
+  nombre: string;
+  precio: number;
+  categoria: string | null;
+  stock_disponible: number;
+  id_colaborador: number | null;
+}
+
+export type AdminProductUpdateBody = Partial<{
+  nombre: string;
+  precio: number;
+  categoria: string | null;
+  stock_disponible: number;
+  id_colaborador: number | null;
+}>;
