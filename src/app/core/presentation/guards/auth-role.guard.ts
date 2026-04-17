@@ -23,3 +23,14 @@ export const adminRoleGuard: CanActivateFn = () => {
 
   return router.createUrlTree(['/login']);
 };
+
+export const collaboratorRoleGuard: CanActivateFn = () => {
+  const auth = inject(AuthSessionService);
+  const router = inject(Router);
+
+  if (auth.hasRole('collaborator')) {
+    return true;
+  }
+
+  return router.createUrlTree(['/login']);
+};

@@ -2,9 +2,6 @@ import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, merge, of } from 'rxjs';
-import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
-import { NotificationService } from '../../../../shared/services/notification.service';
-
 export type FutureUpdatesArea = 'general' | 'colaboradores' | 'postulantes';
 
 @Component({
@@ -14,10 +11,8 @@ export type FutureUpdatesArea = 'general' | 'colaboradores' | 'postulantes';
   styleUrl: './admin-future-updates-page.component.css',
 })
 export class AdminFutureUpdatesPageComponent {
-  private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly notificacion = inject(NotificationService);
 
   protected readonly area = toSignal(
     merge(
@@ -46,15 +41,4 @@ export class AdminFutureUpdatesPageComponent {
     return 'general';
   }
 
-  protected async logout(): Promise<void> {
-    const confirmado = await this.notificacion.confirmar(
-      'Cerrar sesión',
-      '¿Seguro que deseas salir del panel de administración?',
-      'Sí, salir',
-    );
-    if (confirmado) {
-      this.authSession.logout();
-      void this.router.navigateByUrl('/login', { replaceUrl: true });
-    }
-  }
 }

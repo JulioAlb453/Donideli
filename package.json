@@ -14,17 +14,19 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "node scripts/render-spa-server.mjs",
-    "build": "ng build",
-    "build:render": "ng build --configuration=production-static",
+    "serve": "node scripts/run-ng.mjs serve",
+    "start": "node scripts/run-ng.mjs build && node scripts/render-spa-server.mjs",
+    "build": "node scripts/run-ng.mjs build",
+    "build:render": "node scripts/run-ng.mjs build --configuration=production-static",
     "start:render": "node scripts/render-spa-server.mjs",
-    "watch": "ng build --watch --configuration development",
+    "watch": "node scripts/run-ng.mjs build --watch --configuration=development",
     "test": "ng test",
     "serve:ssr:donideli": "node dist/donideli/server/server.mjs"
   },
   "private": true,
   "packageManager": "pnpm",
   "dependencies": {
+    "@angular/animations": "^21.2.7",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
     "@angular/core": "^21.2.0",
@@ -34,6 +36,7 @@
     "@angular/router": "^21.2.0",
     "@angular/ssr": "^21.2.0",
     "express": "^5.1.0",
+    "ng-animate": "^2.0.1",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.26.24",
     "tslib": "^2.3.0"

@@ -1,31 +1,7 @@
 <div class="min-h-screen bg-white">
-  <header class="border-b border-secondary-200/80 bg-secondary-300 px-4 py-3 shadow-sm md:px-6">
-    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
-      <a routerLink="/buyer/inicio" class="flex items-center gap-3 text-left text-primary-900 no-underline">
-        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 font-heading text-lg text-white" aria-hidden="true">D</span>
-        <span>
-          <span class="font-heading block text-xl leading-tight">DoniDeli</span>
-          <span class="font-body block text-xs text-primary-700">Sacia tu antojo</span>
-        </span>
-      </a>
+  <app-buyer-navbar />
 
-      <nav class="font-body flex flex-wrap items-center gap-1 text-sm md:gap-6" aria-label="Principal">
-        <a href="#inicio" class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Inicio</a>
-        <a href="#menu" class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Menu</a>
-        <a routerLink="/buyer/colaboradores" class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Colaboradores</a>
-        <a href="#promociones" class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Promociones</a>
-        <button
-          type="button"
-          class="rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
-          (click)="logout()"
-        >
-          Cerrar sesión
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <section id="inicio" class="bg-secondary-300 px-4 py-16 text-center sm:py-20 md:py-24" aria-labelledby="hero-heading">
+  <section id="inicio" class="doni-hero-block bg-secondary-300 px-4 py-16 text-center sm:py-20 md:py-24" aria-labelledby="hero-heading">
     <h1 id="hero-heading" class="font-heading text-5xl tracking-tight text-primary-800 sm:text-6xl md:text-7xl">
       DoniDeli
     </h1>
@@ -44,9 +20,9 @@
 
   <section id="menu" class="px-4 py-14 sm:py-16 md:py-20" aria-labelledby="categories-heading">
     <h2 id="categories-heading" class="sr-only">Categorias</h2>
-    <div class="mx-auto grid max-w-6xl gap-8 md:grid-cols-3 md:gap-10">
+    <div class="doni-stagger-children mx-auto grid max-w-6xl gap-8 md:grid-cols-3 md:gap-10">
       @for (cat of categories; track cat.title) {
-        <article class="flex flex-col items-center rounded-2xl bg-white px-6 py-8 text-center shadow-md ring-1 ring-primary-100">
+        <article class="doni-card-interactive flex flex-col items-center rounded-2xl bg-white px-6 py-8 text-center shadow-md ring-1 ring-primary-100">
           <div class="mb-5 flex h-16 w-16 items-center justify-center" aria-hidden="true">
             <app-flaticon-icon [name]="cat.flaticonIcon" class="h-14 w-14" />
           </div>
@@ -58,10 +34,10 @@
           </p>
           <a
             class="font-heading mt-6 text-primary-700 underline decoration-primary-500 underline-offset-4 transition hover:text-primary-900"
-            [routerLink]="['/buyer/colaborador', 'demo', 'menu']"
+            routerLink="/buyer/menu"
             [queryParams]="{ category: cat.category }"
           >
-            Ver menu
+            Ver menú
           </a>
         </article>
       }

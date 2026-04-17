@@ -1,15 +1,18 @@
 <app-buyer-navbar />
 
-<main class="bg-[#fffdfb] pb-16">
+<main class="doni-main-content bg-[#fffdfb] pb-16">
   <div class="border-b border-secondary-200/80 bg-white/90 px-4 py-3 md:px-6">
-    <div class="mx-auto flex max-w-6xl items-center justify-between">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2">
       <h1 class="font-heading text-xl text-primary-900 md:text-2xl">Mis pedidos</h1>
-      <p class="font-body text-sm text-primary-600">{{ orders.total_pedidos() }} pedido(s)</p>
+      <div class="text-right">
+        <p class="font-body text-sm text-primary-600">{{ total_pedidos_vista() }} pedido(s)</p>
+        <p class="font-body text-xs text-primary-400">Estado sincronizado automáticamente</p>
+      </div>
     </div>
   </div>
 
   <div class="mx-auto max-w-4xl px-4 py-8">
-    @if (orders.items().length === 0) {
+    @if (pedidos_vista().length === 0) {
       <div class="rounded-3xl border border-dashed border-primary-200 bg-primary-50/50 py-16 text-center">
         <span class="material-symbols-rounded text-5xl text-primary-300" aria-hidden="true">receipt_long</span>
         <p class="font-heading mt-4 text-xl text-primary-700">No tienes pedidos aún</p>
@@ -24,7 +27,7 @@
     } @else {
       <div class="orders-scroll-box max-h-[70vh] overflow-y-auto rounded-3xl border border-primary-100 bg-primary-50/30 p-4 shadow-inner ring-1 ring-primary-50 md:p-5">
       <ul class="space-y-4" role="list">
-        @for (pedido of orders.items(); track pedido.id_pedido) {
+        @for (pedido of pedidos_vista(); track pedido.id_pedido) {
           <li
             class="buyer-order-card group cursor-pointer rounded-2xl border border-primary-100 bg-white p-5 shadow-sm ring-1 ring-primary-50 transition hover:shadow-md md:p-6"
             (click)="abrir_detalle(pedido)"
@@ -84,7 +87,7 @@
                 <span class="material-symbols-rounded text-sm" aria-hidden="true">chat</span>
                 Chatear
               </button>
-              @if (puede_modificar(pedido)) {
+              @if (puede_reagendar(pedido)) {
                 <button
                   type="button"
                   class="font-body inline-flex items-center gap-1.5 rounded-xl border border-primary-200 bg-white px-3 py-1.5 text-xs text-primary-800 transition hover:border-secondary-400 hover:text-secondary-500"
@@ -93,6 +96,8 @@
                   <span class="material-symbols-rounded text-sm" aria-hidden="true">event</span>
                   Reagendar
                 </button>
+              }
+              @if (puede_modificar(pedido)) {
                 <button
                   type="button"
                   class="font-body inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs text-red-700 transition hover:bg-red-50"
@@ -218,17 +223,20 @@
         </button>
         @if (puede_modificar(pedido)) {
           <div class="flex gap-2">
+            @if (puede_reagendar(pedido)) {
+              <button
+                type="button"
+                class="font-heading flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-primary-200 bg-white px-4 py-2.5 text-sm text-primary-800 transition hover:border-secondary-400 hover:text-secondary-500"
+                (click)="reagendar_pedido(pedido)"
+              >
+                <span class="material-symbols-rounded text-base" aria-hidden="true">event</span>
+                Reagendar
+              </button>
+            }
             <button
               type="button"
-              class="font-heading flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-primary-200 bg-white px-4 py-2.5 text-sm text-primary-800 transition hover:border-secondary-400 hover:text-secondary-500"
-              (click)="reagendar_pedido(pedido)"
-            >
-              <span class="material-symbols-rounded text-base" aria-hidden="true">event</span>
-              Reagendar
-            </button>
-            <button
-              type="button"
-              class="font-heading flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm text-red-700 transition hover:bg-red-50"
+              class="font-heading flex-1 inline-flex min-w-0 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm text-red-700 transition hover:bg-red-50"
+              [class.flex-1]="puede_reagendar(pedido)"
               (click)="cancelar_pedido(pedido)"
             >
               <span class="material-symbols-rounded text-base" aria-hidden="true">cancel</span>
@@ -248,9 +256,3 @@
   </div>
 }
 
-@if (chat_target(); as target) {
-  <app-buyer-chat
-    [id_colaborador]="target.id_colaborador"
-    [nombre]="target.nombre"
-  />
-}

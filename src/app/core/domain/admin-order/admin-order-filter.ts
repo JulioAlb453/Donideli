@@ -19,6 +19,7 @@ export function filterAdminOrders(
       o.customerName.toLowerCase().includes(q) ||
       o.customerPhone.replace(/\s/g, '').toLowerCase().includes(q.replace(/\s/g, '')) ||
       o.collaboratorName.toLowerCase().includes(q) ||
+      o.paymentMethod.toLowerCase().includes(q) ||
       itemText.toLowerCase().includes(q);
     return statusOk && searchOk;
   });

@@ -1,5 +1,5 @@
 <header
-  class="border-b border-secondary-200/80 bg-secondary-300 px-4 py-3 shadow-sm md:px-6"
+  class="sticky top-0 z-40 border-b border-secondary-200/80 bg-secondary-300/95 px-4 py-3 shadow-sm backdrop-blur-sm md:px-6"
 >
   <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
     <a
@@ -25,19 +25,19 @@
         routerLink="/buyer/inicio"
         [routerLinkActive]="rlaNav"
         [routerLinkActiveOptions]="{ exact: true }"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Inicio</a
       >
       <a
         routerLink="/buyer/pedidos"
         [routerLinkActive]="rlaNav"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Mis pedidos</a
       >
       <a
         routerLink="/buyer/carrito"
         [routerLinkActive]="rlaNav"
-        class="relative rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link relative rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Carrito
         @if (cart.cantidad_items() > 0) {
           <span
@@ -49,17 +49,47 @@
       <a
         routerLink="/buyer/colaboradores"
         [routerLinkActive]="rlaNav"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Colaboradores</a
       >
       <a
-        href="#"
-        class="rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        routerLink="/buyer/menu"
+        [routerLinkActive]="rlaNav"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
+        >Menú</a
+      >
+      <button
+        type="button"
+        class="doni-nav-link relative inline-flex items-center gap-1 rounded-full px-3 py-2 text-primary-800 hover:bg-white/40"
+        [class.font-semibold]="chat_panel_abierto()"
+        [class.underline]="chat_panel_abierto()"
+        [class.decoration-primary-700]="chat_panel_abierto()"
+        [class.decoration-2]="chat_panel_abierto()"
+        [class.underline-offset-4]="chat_panel_abierto()"
+        [attr.aria-expanded]="chat_panel_abierto()"
+        aria-controls="buyer-chat-panel"
+        (click)="toggle_chat()"
+      >
+        <span class="material-symbols-rounded text-base" aria-hidden="true">chat</span>
+        <span class="hidden sm:inline">Mensajes</span>
+        @if (!chat_panel_abierto() && chat.total_mensajes() > 0) {
+          <span
+            class="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+            aria-hidden="true"
+          >
+            {{ chat.total_mensajes() }}
+          </span>
+        }
+      </button>
+      <a
+        routerLink="/buyer/inicio"
+        fragment="promociones"
+        class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40"
         >Promociones</a
       >
       <button
         type="button"
-        class="rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
+        class="doni-press rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
         (click)="logout()"
       >
         Cerrar sesión
@@ -68,3 +98,38 @@
 
   </div>
 </header>
+
+@if (alertaResolucionPostulacion(); as post) {
+  <div
+    class="border-b px-4 py-3 md:px-6"
+    [class.bg-emerald-50]="(post.estado || '').toLowerCase() === 'aceptada'"
+    [class.border-emerald-200]="(post.estado || '').toLowerCase() === 'aceptada'"
+    [class.bg-red-50]="(post.estado || '').toLowerCase() === 'rechazada'"
+    [class.border-red-200]="(post.estado || '').toLowerCase() === 'rechazada'"
+    role="status"
+  >
+    <div class="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0">
+        @if ((post.estado || '').toLowerCase() === 'aceptada') {
+          <p class="font-heading text-sm text-emerald-900 md:text-base">Tu postulación como colaborador fue aceptada</p>
+          <p class="font-body mt-1 text-sm text-emerald-800">
+            Nos pondremos en contacto contigo con los siguientes pasos. Si tienes dudas, escríbenos por los canales de
+            DoniDeli.
+          </p>
+        } @else {
+          <p class="font-heading text-sm text-red-900 md:text-base">Tu postulación como colaborador no fue aprobada</p>
+          <p class="font-body mt-1 text-sm text-red-800">
+            Puedes enviar una nueva solicitud más adelante desde la sección Colaboradores si lo deseas.
+          </p>
+        }
+      </div>
+      <button
+        type="button"
+        class="font-body shrink-0 self-end rounded-xl border border-primary-300 bg-white px-4 py-2 text-sm text-primary-800 transition hover:bg-primary-50 sm:self-center"
+        (click)="descartar_alerta_postulacion()"
+      >
+        Entendido
+      </button>
+    </div>
+  </div>
+}

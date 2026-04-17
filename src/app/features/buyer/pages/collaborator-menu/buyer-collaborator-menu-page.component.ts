@@ -1,15 +1,16 @@
-import { Component, computed, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { Component, computed, effect, inject, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { BuyerCatalogRefreshService } from '../../../../core/application/buyer/buyer-catalog-refresh.service';
 import type { Collaborator, CollaboratorCategory } from '../../../../core/domain/collaborator/collaborator.model';
 import { CollaboratorRepositoryPort } from '../../../../core/domain/collaborator/collaborator.repository.port';
 import { collaboratorCategoryToFlaticon } from '../../utils/collaborator-category-ui';
 import { BuyerCartService } from '../../services/buyer-cart.service';
-import {
-  getMenuByCollaborator,
-  type MenuProduct,
-} from '../../../../core/infrastructure/collaborators/collaborator-menu-products.data';
+import { ProductCatalogApiRepository } from '../../../../core/infrastructure/productos/product-catalog-api.repository';
+import type { MenuProduct } from '../../../../core/infrastructure/productos/product-catalog.mapper';
+import { BuyerChatContextService } from '../../services/buyer-chat-context.service';
 
 @Component({
   selector: 'app-buyer-collaborator-menu-page',
@@ -17,14 +18,21 @@ import {
   templateUrl: './buyer-collaborator-menu-page.component.html',
   styleUrl: './buyer-collaborator-menu-page.component.css',
 })
-export class BuyerCollaboratorMenuPageComponent {
+export class BuyerCollaboratorMenuPageComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
   private readonly cart = inject(BuyerCartService);
+  private readonly catalogRepo = inject(ProductCatalogApiRepository);
+  private readonly catalogRefresh = inject(BuyerCatalogRefreshService);
+  private readonly chatCtx = inject(BuyerChatContextService);
 
-  private readonly collaborators = toSignal(this.collaboratorRepo.findAllActive(), {
-    initialValue: [] as Collaborator[],
-  });
+  private readonly collaborators = toSignal(
+    toObservable(this.catalogRefresh.epoch).pipe(
+      switchMap(() => this.collaboratorRepo.findAllActive()),
+    ),
+    { initialValue: [] as Collaborator[] },
+  );
 
   protected readonly id_colaborador = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id'))),
@@ -96,20 +104,22 @@ export class BuyerCollaboratorMenuPageComponent {
     }
   });
 
-  protected readonly allCollaboratorProducts = computed(() => {
-    const id = this.id_colaborador();
-    if (!id) return [];
-    return getMenuByCollaborator(id);
-  });
-
-  protected readonly products = computed(() =>
-    this.allCollaboratorProducts().filter((p) => p.categoria === this.selectedCategory()),
+  protected readonly allCollaboratorProducts = toSignal(
+    combineLatest([
+      this.route.paramMap.pipe(
+        map((params) => params.get('id')),
+        distinctUntilChanged(),
+      ),
+      toObservable(this.catalogRefresh.epoch),
+    ]).pipe(switchMap(([id]) => this.catalogRepo.findMenuForCollaborator(id))),
+    { initialValue: [] as MenuProduct[] },
   );
 
-  protected readonly availableCategories = computed(() => {
-    const cats = new Set(this.allCollaboratorProducts().map((p) => p.categoria));
-    return this.allCategoryLinks.filter((c) => cats.has(c.id));
-  });
+  protected readonly products = computed(() =>
+    this.allCollaboratorProducts().filter(
+      (p: MenuProduct) => p.categoria === this.selectedCategory(),
+    ),
+  );
 
   private readonly allCategoryLinks: { id: CollaboratorCategory; label: string }[] = [
     { id: 'donas', label: 'Donas' },
@@ -117,22 +127,71 @@ export class BuyerCollaboratorMenuPageComponent {
     { id: 'bebidas', label: 'Bebidas' },
   ];
 
-  protected readonly categoryLinks = this.allCategoryLinks;
+  protected readonly categoryLinks = computed(() => {
+    const catalog = this.allCollaboratorProducts();
+    if (catalog.length === 0) {
+      return this.allCategoryLinks;
+    }
+    const cats = new Set(catalog.map((p: MenuProduct) => p.categoria));
+    return this.allCategoryLinks.filter((c) => cats.has(c.id));
+  });
+
+  constructor() {
+    effect(() => {
+      const id = this.id_colaborador();
+      if (!id) {
+        return;
+      }
+      const catalog = this.allCollaboratorProducts();
+      const selected = this.selectedCategory();
+      if (catalog.length === 0) {
+        return;
+      }
+      const withProducts = new Set(catalog.map((p: MenuProduct) => p.categoria));
+      if (withProducts.has(selected)) {
+        return;
+      }
+      const fallback = this.allCategoryLinks.find((c) => withProducts.has(c.id))?.id;
+      if (!fallback) {
+        return;
+      }
+      void this.router.navigate(['/buyer/colaborador', id, 'menu'], {
+        queryParams: { category: fallback },
+        replaceUrl: true,
+      });
+    });
+
+    effect(() => {
+      const id = this.id_colaborador();
+      if (!id) {
+        return;
+      }
+      const email = this.email_colaborador().trim();
+      this.chatCtx.setPeer(email || id, this.nombre_colaborador());
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.chatCtx.resetToCentralChat();
+  }
 
   protected isActiveCategory(category: CollaboratorCategory): boolean {
     return this.selectedCategory() === category;
   }
 
   protected agregar_al_carrito(producto: MenuProduct): void {
-    const cid = this.id_colaborador() ?? '0';
+    const email =
+      this.email_colaborador().trim() ||
+      this.collaborators().find((c) => c.id === producto.shelfId)?.email ||
+      '';
     this.cart.addProduct({
-      id_colaborador: cid,
-      email_colaborador: this.email_colaborador(),
+      id_colaborador: producto.shelfId,
+      email_colaborador: email,
       id_producto: producto.id_producto,
       nombre: producto.nombre,
       precio: producto.precio,
-      nombre_colaborador: this.nombre_colaborador(),
-      icon: collaboratorCategoryToFlaticon(this.selectedCategory()),
+      nombre_colaborador: producto.shelfDisplayName,
+      icon: collaboratorCategoryToFlaticon(producto.categoria),
     });
   }
 

@@ -1,0 +1,92 @@
+<div class="admin-nav-root flex h-full min-h-0 w-full flex-col md:min-h-screen">
+  <aside
+    class="hidden min-h-0 w-full flex-col border-b border-primary-800 bg-primary-900 text-primary-100 md:flex md:min-h-screen md:flex-1 md:border-b-0 md:border-r md:border-primary-800"
+    aria-label="Navegación de colaborador"
+  >
+    <div class="border-b border-primary-800 px-5 py-5">
+      <p class="font-heading text-lg text-white">DoniDeli</p>
+      <span
+        class="font-body mt-2 inline-flex items-center gap-1 rounded-full bg-amber-500/90 px-2.5 py-0.5 text-[10px] font-medium uppercase text-white"
+      >
+        Colaborador
+      </span>
+    </div>
+
+    <nav class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4 font-body text-sm">
+      <p class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-primary-400">Panel</p>
+
+      <a
+        routerLink="/collaborator/productos"
+        routerLinkActive="bg-secondary-400 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-100 no-underline transition hover:bg-primary-800"
+      >
+        <span class="text-base" aria-hidden="true">🍩</span>
+        Mis platillos
+      </a>
+    </nav>
+
+    <div class="mt-auto border-t border-primary-800 px-4 py-4">
+      <button
+        type="button"
+        class="mt-1 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm text-primary-200 transition hover:bg-primary-800 hover:text-white"
+        (click)="on_logout()"
+      >
+        <span class="material-symbols-rounded text-base">logout</span>
+        Salir
+      </button>
+    </div>
+  </aside>
+
+  <div
+    class="flex items-center border-b border-primary-800 bg-primary-900 px-4 py-3 text-sm text-primary-100 md:hidden"
+  >
+    <button
+      type="button"
+      class="flex h-9 w-9 items-center justify-center rounded-lg text-primary-100 transition hover:bg-primary-800"
+      (click)="toggle_menu()"
+      aria-label="Abrir menú"
+    >
+      <span class="material-symbols-rounded text-xl">
+        {{ menu_abierto() ? 'close' : 'menu' }}
+      </span>
+    </button>
+    <span class="font-heading flex-1 text-center text-white">DoniDeli · Colaborador</span>
+    <div class="w-9"></div>
+  </div>
+
+  @if (menu_abierto()) {
+    <div
+      class="admin-mobile-overlay fixed inset-0 z-[60] bg-primary-900/40 backdrop-blur-sm md:hidden"
+      (click)="cerrar_menu()"
+    ></div>
+
+    <aside
+      class="admin-mobile-drawer fixed inset-y-0 left-0 z-[70] flex w-72 max-w-[85vw] flex-col bg-primary-900 text-primary-100 shadow-2xl md:hidden"
+      aria-label="Menú colaborador"
+    >
+      <div class="border-b border-primary-800 px-5 py-6">
+        <p class="font-heading text-xl text-white">DoniDeli</p>
+        <p class="font-body mt-2 text-xs text-primary-300">Panel de colaborador</p>
+      </div>
+      <nav class="flex flex-1 flex-col gap-1 px-3 py-4 font-body text-sm">
+        <a
+          routerLink="/collaborator/productos"
+          routerLinkActive="bg-secondary-400 text-white"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="flex items-center gap-2 rounded-xl px-3 py-2.5 no-underline transition hover:bg-primary-800"
+          (click)="on_nav_click()"
+        >
+          🍩 Mis platillos
+        </a>
+        <button
+          type="button"
+          class="mt-auto flex items-center gap-2 rounded-xl px-3 py-2.5 text-primary-200 transition hover:bg-primary-800"
+          (click)="on_logout()"
+        >
+          Cerrar sesión
+        </button>
+      </nav>
+    </aside>
+  }
+</div>

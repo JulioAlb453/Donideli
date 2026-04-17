@@ -1,12 +1,14 @@
-<div
-  class="admin-chat-overlay fixed inset-0 z-40 bg-primary-900/30 backdrop-blur-sm"
-  (click)="cerrar()"
-></div>
+@if (!docked) {
+  <div
+    class="admin-chat-overlay fixed inset-0 z-40 bg-primary-900/30 backdrop-blur-sm"
+    (click)="cerrar()"
+  ></div>
+}
 
 <aside
-  class="admin-chat-sidebar fixed z-50 flex flex-col border-l border-primary-200 bg-white shadow-2xl
-         inset-0
-         md:inset-y-0 md:left-auto md:right-0 md:w-96"
+  class="admin-chat-sidebar flex flex-col border-l border-primary-200 bg-white shadow-2xl"
+  [class.admin-chat-sidebar--floating]="!docked"
+  [class.admin-chat-sidebar--docked]="docked"
 >
   <!-- Header -->
   <div class="flex items-center gap-3 border-b border-primary-200 bg-primary-900 px-4 py-4 safe-area-top">
@@ -38,21 +40,23 @@
         }
       </p>
     </div>
-    <button
-      type="button"
-      class="rounded-lg p-1.5 text-primary-300 transition hover:bg-primary-800 hover:text-white"
-      (click)="cerrar()"
-      aria-label="Cerrar panel de chat"
-    >
-      <span class="material-symbols-rounded text-xl">close</span>
-    </button>
+    @if (!docked) {
+      <button
+        type="button"
+        class="rounded-lg p-1.5 text-primary-300 transition hover:bg-primary-800 hover:text-white"
+        (click)="cerrar()"
+        aria-label="Cerrar panel de chat"
+      >
+        <span class="material-symbols-rounded text-xl">close</span>
+      </button>
+    }
   </div>
 
   @if (!chat.room_activo()) {
     <!-- Lista de conversaciones -->
     <div class="flex-1 overflow-y-auto">
       @if (chat.conversaciones_list().length === 0) {
-        <div class="flex flex-col items-center justify-center py-20 text-center px-4">
+        <div class="flex flex-col items-center justify-center px-4 py-20 text-center">
           <span class="material-symbols-rounded text-5xl text-primary-200" aria-hidden="true">forum</span>
           <p class="font-body mt-3 text-sm text-primary-400">Sin conversaciones activas</p>
           <p class="font-body mt-1 text-xs text-primary-300">

@@ -1,4 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, signal, computed, OnDestroy, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import {
+  collaborationTokenUrl,
+  collaborationWsUrl,
+  environment,
+} from '../../../../environments/environment';
+import { AuthSessionService } from '../../../core/application/auth/auth-session.service';
+import { API_BASE_URL } from '../../../core/config/api-base-url.token';
+import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
+import { CollaborationChatApiService } from '../../../core/infrastructure/chat/collaboration-chat-api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 export interface AdminChatMessage {
@@ -22,15 +33,20 @@ interface WSIncoming {
   data?: { texto: string; timestamp: number };
 }
 
-const WS_BASE = 'wb-donideli.fly.dev';
-const TOKEN_URL = `https://${WS_BASE}/auth/token`;
-const WS_URL = `wss://${WS_BASE}/ws`;
+const TOKEN_URL = collaborationTokenUrl(environment.wsCollaborationOrigin);
+const WS_URL = collaborationWsUrl(environment.wsCollaborationOrigin);
 const RECONNECT_DELAY = 3000;
-const ADMIN_USER_ID = 'admin@donideli.com';
 
 @Injectable({ providedIn: 'root' })
 export class AdminChatService implements OnDestroy {
+  private readonly auth = inject(AuthSessionService);
+  private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = inject(API_BASE_URL);
   private readonly notificacion = inject(NotificationService);
+  private readonly chatApi = inject(CollaborationChatApiService);
+  private lastResolvedContactoPeer = '';
+  private contactoPeerInflight: Promise<string> | null = null;
+  private conectarInflight: Promise<void> | null = null;
   private ws: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
@@ -66,6 +82,19 @@ export class AdminChatService implements OnDestroy {
   });
 
   async conectar(): Promise<void> {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      return;
+    }
+    if (this.conectarInflight) {
+      return this.conectarInflight;
+    }
+    this.conectarInflight = this.ejecutarConexion().finally(() => {
+      this.conectarInflight = null;
+    });
+    return this.conectarInflight;
+  }
+
+  private async ejecutarConexion(): Promise<void> {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
@@ -74,9 +103,14 @@ export class AdminChatService implements OnDestroy {
 
     let token: string;
     try {
+      await this.fetchCanonicalAdminPeer();
       token = await this.fetchToken();
     } catch {
       this.scheduleReconnect();
+      return;
+    }
+
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
@@ -116,9 +150,11 @@ export class AdminChatService implements OnDestroy {
     this.ws?.close();
     this.ws = null;
     this._conectado.set(false);
+    this.lastResolvedContactoPeer = '';
   }
 
-  entrar_room(buyer_id: string): void {
+  async entrar_room(buyer_id: string): Promise<void> {
+    await this.fetchCanonicalAdminPeer();
     const room = this.buildRoom(buyer_id);
     this.joinedRooms.add(room);
 
@@ -129,6 +165,16 @@ export class AdminChatService implements OnDestroy {
     }
 
     this.send({ type: 'join', room });
+    void this.hydrateRoom(room, buyer_id);
+  }
+
+  async abrir_chat_con_comprador(buyerId: string): Promise<void> {
+    const id = buyerId.trim();
+    if (!id) {
+      return;
+    }
+    await this.entrar_room(id);
+    this.abrir_conversacion(this.buildRoom(id));
   }
 
   abrir_conversacion(room: string): void {
@@ -138,6 +184,9 @@ export class AdminChatService implements OnDestroy {
     if (conv && conv.no_leidos > 0) {
       convs.set(room, { ...conv, no_leidos: 0 });
       this._conversaciones.set(convs);
+    }
+    if (conv) {
+      void this.hydrateRoom(room, conv.buyer_id);
     }
   }
 
@@ -163,11 +212,13 @@ export class AdminChatService implements OnDestroy {
         ...conv,
         mensajes: [
           ...conv.mensajes,
-          { sender_id: ADMIN_USER_ID, texto: texto.trim(), timestamp, propio: true },
+          { sender_id: this.wsUserId(), texto: texto.trim(), timestamp, propio: true },
         ],
       });
       this._conversaciones.set(convs);
     }
+
+    void this.chatApi.guardarMensaje(room, texto.trim(), timestamp).catch(() => {});
   }
 
   ngOnDestroy(): void {
@@ -178,7 +229,14 @@ export class AdminChatService implements OnDestroy {
     if (msg.type !== 'message' || !msg.data || !msg.room) return;
 
     const room = msg.room;
+    if (!this.joinedRooms.has(room)) {
+      this.joinedRooms.add(room);
+      this.send({ type: 'join', room });
+    }
     const sender = msg.sender_id ?? 'desconocido';
+    if (sender.toLowerCase() === this.wsUserId().toLowerCase()) {
+      return;
+    }
     const texto = msg.data.texto;
     const convs = new Map(this._conversaciones());
     let conv = convs.get(room);
@@ -214,11 +272,50 @@ export class AdminChatService implements OnDestroy {
     return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
+  private async hydrateRoom(room: string, buyer_id: string): Promise<void> {
+    try {
+      const rows = await this.chatApi.listMensajes(room);
+      const adminLower = this.wsUserId().toLowerCase();
+      const fromApi = rows.map((m) => ({
+        sender_id: m.sender_id,
+        texto: m.texto,
+        timestamp: m.timestamp,
+        propio: m.sender_id.toLowerCase() === adminLower,
+      }));
+      const convs = new Map(this._conversaciones());
+      const prev = convs.get(room) ?? { room, buyer_id, mensajes: [], no_leidos: 0 };
+      convs.set(room, {
+        ...prev,
+        buyer_id: prev.buyer_id || buyer_id,
+        mensajes: this.mergeMensajes(prev.mensajes, fromApi),
+      });
+      this._conversaciones.set(convs);
+    } catch {
+      /* sin sesión u offline */
+    }
+  }
+
+  private mergeMensajes(
+    local: AdminChatMessage[],
+    fromApi: AdminChatMessage[],
+  ): AdminChatMessage[] {
+    const key = (m: AdminChatMessage) => `${m.timestamp}|${m.sender_id}|${m.texto}`;
+    const seen = new Set<string>();
+    const out: AdminChatMessage[] = [];
+    for (const m of [...local, ...fromApi].sort((a, b) => a.timestamp - b.timestamp)) {
+      const k = key(m);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(m);
+    }
+    return out;
+  }
+
   private async fetchToken(): Promise<string> {
     const res = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: ADMIN_USER_ID }),
+      body: JSON.stringify({ user_id: this.wsUserId() }),
     });
     if (!res.ok) throw new Error('Token request failed');
     const data: { token: string } = await res.json();
@@ -226,13 +323,64 @@ export class AdminChatService implements OnDestroy {
   }
 
   private buildRoom(buyer_id: string): string {
-    const parts = [buyer_id, ADMIN_USER_ID].sort();
+    const parts = [buyer_id, this.roomAdminPeer()].sort();
     return `chat:${parts[0]}:${parts[1]}`;
   }
 
   private extractBuyerFromRoom(room: string): string {
+    const adminLower = this.roomAdminPeer().toLowerCase();
     const parts = room.replace('chat:', '').split(':');
-    return parts.find((p) => p !== ADMIN_USER_ID) ?? parts[0];
+    return parts.find((p) => p.toLowerCase() !== adminLower) ?? parts[0];
+  }
+
+  private fetchCanonicalAdminPeer(): Promise<string> {
+    if (!this.contactoPeerInflight) {
+      this.contactoPeerInflight = this.loadContactoPeerFromApi().finally(() => {
+        this.contactoPeerInflight = null;
+      });
+    }
+    return this.contactoPeerInflight;
+  }
+
+  private async loadContactoPeerFromApi(): Promise<string> {
+    const base = this.apiBaseUrl.replace(/\/$/, '');
+    let out: string;
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ peer_id?: string }>(`${base}/admins/contacto-chat`),
+      );
+      const id = res?.peer_id?.trim() ?? '';
+      out = id || this.fallbackRoomPeer();
+    } catch {
+      out = this.fallbackRoomPeer();
+    }
+    this.lastResolvedContactoPeer = out;
+    return out;
+  }
+
+  private fallbackRoomPeer(): string {
+    const u = this.auth.currentUser();
+    if (u?.role === 'admin' && u.email?.trim()) {
+      return u.email.trim();
+    }
+    const fb = ADMIN_COLLABORATION_USER_ID.trim();
+    return fb || 'admin';
+  }
+
+  private roomAdminPeer(): string {
+    const v = this.lastResolvedContactoPeer.trim();
+    if (v) {
+      return v;
+    }
+    return this.fallbackRoomPeer();
+  }
+
+  private wsUserId(): string {
+    const u = this.auth.currentUser();
+    if ((u?.role === 'admin' || u?.role === 'collaborator') && u.email?.trim()) {
+      return u.email.trim();
+    }
+    return this.fallbackRoomPeer();
   }
 
   private send(obj: Record<string, unknown>): void {

@@ -2,7 +2,6 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import type { UserRole } from '../../../../core/domain/auth/auth-user.model';
-
 @Component({
   selector: 'app-login-page',
   standalone: false,
@@ -32,15 +31,8 @@ export class LoginPageComponent {
   protected setRole(role: UserRole): void {
     this.role.set(role);
     this.errorMessage.set('');
-
-    if (role === 'buyer') {
-      this.email.set('comprador@donideli.com');
-      this.password.set('buyer123');
-      return;
-    }
-
-    this.email.set('admin@donideli.com');
-    this.password.set('admin123');
+    this.email.set('');
+    this.password.set('');
   }
 
   protected onEmailInput(event: Event): void {
@@ -51,8 +43,8 @@ export class LoginPageComponent {
     this.password.set((event.target as HTMLInputElement).value);
   }
 
-  protected submit(): void {
-    const ok = this.authSession.login(
+  protected async submit(): Promise<void> {
+    const ok = await this.authSession.login(
       this.email(),
       this.password(),
       this.role(),

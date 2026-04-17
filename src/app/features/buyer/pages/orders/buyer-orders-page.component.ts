@@ -1,11 +1,29 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+import { catchError, interval, of, startWith, switchMap } from 'rxjs';
+import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import { BuyerOrdersService, type BuyerOrder } from '../../services/buyer-orders.service';
+import { BuyerPedidosApiService } from '../../services/buyer-pedidos-api.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import Swal from 'sweetalert2';
+import { BuyerChatContextService } from '../../services/buyer-chat-context.service';
 
-interface ChatTarget {
-  id_colaborador: string;
-  nombre: string;
+const POLL_MS = 8000;
+
+function mergePedidosVista(api: BuyerOrder[], local: BuyerOrder[]): BuyerOrder[] {
+  const map = new Map<string, BuyerOrder>();
+  for (const o of api) {
+    map.set(o.id_pedido, o);
+  }
+  for (const l of local) {
+    if (!map.has(l.id_pedido)) {
+      map.set(l.id_pedido, l);
+    }
+  }
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime(),
+  );
 }
 
 @Component({
@@ -16,11 +34,21 @@ interface ChatTarget {
 })
 export class BuyerOrdersPageComponent {
   protected readonly orders = inject(BuyerOrdersService);
+  private readonly pedidosApi = inject(BuyerPedidosApiService);
+  private readonly authSession = inject(AuthSessionService);
   private readonly notificacion = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly chatCtx = inject(BuyerChatContextService);
+
+  private readonly apiOrders = signal<BuyerOrder[]>([]);
+
+  protected readonly pedidos_vista = computed(() =>
+    mergePedidosVista(this.apiOrders(), this.orders.items()),
+  );
+
+  protected readonly total_pedidos_vista = computed(() => this.pedidos_vista().length);
 
   protected readonly detalle_abierto = signal<BuyerOrder | null>(null);
-  protected readonly chat_target = signal<ChatTarget | null>(null);
-  protected readonly chat_abierto = computed(() => this.chat_target() !== null);
 
   protected readonly fecha_minima = new Date().toISOString().slice(0, 10);
 
@@ -30,6 +58,43 @@ export class BuyerOrdersPageComponent {
     { value: '15-18', label: 'Tarde (15:00 – 18:00)' },
     { value: '18-20', label: 'Noche (18:00 – 20:00)' },
   ];
+
+  constructor() {
+    interval(POLL_MS)
+      .pipe(
+        startWith(0),
+        switchMap(() => {
+          if (!this.authSession.hasRole('buyer')) {
+            return of([] as BuyerOrder[]);
+          }
+          return this.pedidosApi.fetchHistorial().pipe(catchError(() => of([])));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((list) => this.apiOrders.set(list));
+
+    effect(() => {
+      const det = this.detalle_abierto();
+      if (!det) {
+        return;
+      }
+      const fresh = this.pedidos_vista().find((p) => p.id_pedido === det.id_pedido);
+      if (!fresh) {
+        return;
+      }
+      if (
+        fresh.estado !== det.estado ||
+        fresh.total !== det.total ||
+        fresh.lineas.length !== det.lineas.length
+      ) {
+        this.detalle_abierto.set(fresh);
+      }
+    });
+  }
+
+  protected es_desde_api(pedido: BuyerOrder): boolean {
+    return pedido.id_pedido.startsWith('API-');
+  }
 
   protected abrir_detalle(pedido: BuyerOrder): void {
     this.detalle_abierto.set(pedido);
@@ -43,13 +108,38 @@ export class BuyerOrdersPageComponent {
     return pedido.estado === 'pendiente' || pedido.estado === 'en_camino';
   }
 
+  protected puede_reagendar(pedido: BuyerOrder): boolean {
+    return this.puede_modificar(pedido) && !this.es_desde_api(pedido);
+  }
+
   protected async cancelar_pedido(pedido: BuyerOrder): Promise<void> {
     const confirmado = await this.notificacion.confirmar(
       'Cancelar pedido',
       `¿Estás seguro de cancelar el pedido #${pedido.id_pedido}? Esta acción no se puede deshacer.`,
       'Sí, cancelar',
     );
-    if (!confirmado) return;
+    if (!confirmado) {
+      return;
+    }
+
+    const apiMatch = /^API-(\d+)$/.exec(pedido.id_pedido);
+    if (apiMatch) {
+      try {
+        await firstValueFrom(this.pedidosApi.cancelarPedido(Number(apiMatch[1])));
+        this.orders.eliminarSiExiste(pedido.id_pedido);
+        this.detalle_abierto.set(null);
+        this.apiOrders.update((prev) =>
+          prev.map((p) =>
+            p.id_pedido === pedido.id_pedido ? { ...p, estado: 'cancelado' as const } : p,
+          ),
+        );
+        await this.notificacion.exito('Pedido cancelado', `El pedido #${pedido.id_pedido} fue cancelado.`);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'No se pudo cancelar.';
+        await this.notificacion.error('Error', msg);
+      }
+      return;
+    }
 
     const ok = this.orders.cancelar(pedido.id_pedido);
     if (ok) {
@@ -109,14 +199,9 @@ export class BuyerOrdersPageComponent {
 
   protected abrir_chat(pedido: BuyerOrder): void {
     this.detalle_abierto.set(null);
-    this.chat_target.set({
-      id_colaborador: pedido.email_colaborador || pedido.id_colaborador,
-      nombre: pedido.nombre_colaborador,
-    });
-  }
-
-  protected cerrar_chat(): void {
-    this.chat_target.set(null);
+    const nombre = (pedido.nombre_colaborador ?? '').trim() || 'Colaborador';
+    this.chatCtx.setPeer(pedido.email_colaborador || pedido.id_colaborador, nombre);
+    this.chatCtx.openPanel();
   }
 
   protected formato_fecha(iso: string): string {

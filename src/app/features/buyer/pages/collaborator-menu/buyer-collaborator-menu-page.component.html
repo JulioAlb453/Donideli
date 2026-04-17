@@ -1,16 +1,17 @@
 <app-buyer-navbar />
 
-<main class="bg-[#fffdfb] pb-16">
+<main class="doni-main-content bg-[#fffdfb] pb-16">
   <section class="bg-secondary-300/90 px-4 py-10 md:py-10">
-    <div class="mx-auto max-w-6xl text-center">
+    <div class="doni-animate-header mx-auto max-w-6xl text-center">
       <p class="font-body text-lg text-secondary-600">Menu especial: {{ categoryTitle() }}</p>
       <h1 class="font-heading mt-2 text-4xl text-primary-900 md:text-6xl">Nuestro Menu</h1>
       <p class="font-body mt-3 text-primary-700">{{ heroDescription() }}</p>
       <div class="mx-auto mt-5 h-1 w-40 rounded-full bg-secondary-400"></div>
 
       <div class="font-body mt-8 flex flex-wrap justify-center gap-2">
-        @for (cat of categoryLinks; track cat.id) {
-        <a [routerLink]="['/buyer/colaborador', id_colaborador() ?? 'demo', 'menu']"
+        @for (cat of categoryLinks(); track cat.id) {
+        <a
+          [routerLink]="id_colaborador() ? ['/buyer/colaborador', id_colaborador(), 'menu'] : ['/buyer/inicio']"
           [queryParams]="{ category: cat.id }" class="rounded-full border px-4 py-2 text-sm no-underline transition"
           [class.bg-secondary-400]="isActiveCategory(cat.id)" [class.text-white]="isActiveCategory(cat.id)"
           [class.border-transparent]="isActiveCategory(cat.id)" [class.bg-white]="!isActiveCategory(cat.id)"
@@ -58,7 +59,7 @@
           <div class="mt-auto pt-1">
             <button
               type="button"
-              class="font-heading w-full rounded-xl px-4 py-3 transition"
+              class="doni-press font-heading w-full rounded-xl px-4 py-3 transition"
               [ngClass]="productCardButtonClass()"
               (click)="agregar_al_carrito(producto)"
             >
@@ -82,8 +83,3 @@
     </p>
   </section>
 </main>
-
-<app-buyer-chat
-  [id_colaborador]="email_colaborador()"
-  [nombre]="nombre_colaborador()"
-/>

@@ -1,14 +1,11 @@
-<div class="admin-layout flex min-h-screen flex-col bg-primary-50">
-  <app-admin-sidebar (logoutClick)="logout()" />
-
-  <div class="flex min-w-0 flex-1 flex-col">
+<div class="flex min-w-0 flex-1 flex-col bg-primary-50">
     <header
       class="sticky top-0 z-10 border-b border-primary-200 bg-white/95 px-4 py-4 backdrop-blur md:px-8"
     >
       <h1 class="font-heading text-lg text-primary-900 md:text-xl">Próximas actualizaciones</h1>
     </header>
 
-    <main class="flex-1 px-4 py-8 md:px-8">
+    <main class="doni-main-content flex-1 px-4 py-8 md:px-8">
       <div
         class="mx-auto max-w-2xl rounded-3xl border border-primary-100 bg-white p-8 shadow-md ring-1 ring-primary-50 md:p-10"
       >
@@ -55,5 +52,4 @@
         </div>
       </div>
     </main>
-  </div>
 </div>
