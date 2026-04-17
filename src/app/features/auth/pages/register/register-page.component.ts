@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import type { UserRole } from '../../../../core/domain/auth/auth-user.model';
 import { RegistrationService } from '../../services/registration.service';
+import { NotificationService } from '../../../../shared/services/notification.service';
 
 export type RegistroTipo = 'buyer' | 'admin' | 'collaborator';
 
@@ -16,6 +17,7 @@ export class RegisterPageComponent {
   private readonly registration = inject(RegistrationService);
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
+  private readonly notificacion = inject(NotificationService);
 
   protected readonly tipo = signal<RegistroTipo>('buyer');
   protected readonly email = signal('');
@@ -102,9 +104,11 @@ export class RegisterPageComponent {
     const loginOk = await this.authSession.login(mail, pass, role);
     this.submitting.set(false);
     if (!loginOk) {
+      this.notificacion.perfil_creado('Cuenta creada. Inicia sesión con tus credenciales.');
       this.successMessage.set('Cuenta creada. Inicia sesión con tus credenciales.');
       return;
     }
+    this.notificacion.perfil_creado('Bienvenido a DoniDeli.');
     void this.router.navigateByUrl(this.authSession.redirectForRole(role), { replaceUrl: true });
   }
 
@@ -147,6 +151,9 @@ export class RegisterPageComponent {
       return;
     }
 
+    this.notificacion.perfil_creado(
+      'Tu perfil de colaborador quedó registrado. El equipo lo activará en el catálogo.',
+    );
     this.successMessage.set(
       'Perfil de colaborador creado. Aparecerás en el catálogo cuando el equipo active tu cuenta. Usa “Iniciar sesión” si también tienes cuenta de comprador o administrador.',
     );

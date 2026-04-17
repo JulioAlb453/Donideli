@@ -1,5 +1,6 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import type { FlaticonIconName } from '../../../shared/ui/flaticon-icon/flaticon-icons.config';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 
 export interface BuyerCartLine {
@@ -33,6 +34,7 @@ interface LegacyBuyerCartLine {
 
 @Injectable({ providedIn: 'root' })
 export class BuyerCartService {
+  private readonly notificacion = inject(NotificationService);
   private readonly lines = signal<BuyerCartLine[]>(this.loadFromStorage());
 
   readonly items = this.lines.asReadonly();
@@ -78,6 +80,7 @@ export class BuyerCartService {
       ]);
     }
     this.persist();
+    this.notificacion.producto_agregado_al_carrito(input.nombre);
   }
 
   setQuantity(lineId: string, cantidad: number): void {
