@@ -2,7 +2,7 @@
 
 <main class="bg-[#fffdfb] px-4 pb-16 pt-8 md:px-8">
   <div class="mx-auto max-w-6xl">
-    <div class="mb-10 text-center md:text-left">
+    <div class="doni-animate-header mb-10 text-center md:text-left">
       <p
         class="font-body mb-3 inline-block rounded-full bg-secondary-400 px-4 py-1 text-xs font-medium text-white"
       >
@@ -53,9 +53,7 @@
       ></div>
     </div>
 
-    <div
-      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-    >
+    <div class="doni-stagger-children grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       @for (c of filteredCollaborators(); track c.id) {
         <app-collaborator-card [collaborator]="c" />
       }
@@ -80,7 +78,7 @@
           Únete a nuestra red de colaboradores y gestiona tu propio menú en DoniDeli.
         </p>
         <a
-          href="#"
+          routerLink="/buyer/colaboradores/postular"
           class="font-heading mt-6 w-full max-w-xs rounded-xl bg-secondary-400 px-4 py-3 text-center text-sm text-white no-underline transition hover:bg-secondary-500"
         >
           Postularme Ahora!
@@ -88,4 +86,12 @@
       </aside>
     </div>
   </div>
+
+  <p
+    class="font-body mx-auto mt-10 max-w-2xl text-center text-sm text-primary-600"
+  >
+    <span class="material-symbols-rounded align-text-bottom text-secondary-500" aria-hidden="true">chat</span>
+    ¿Dudas para postular o sobre un pedido? Abre <strong class="font-medium text-primary-800">Mensajes</strong> en la barra superior
+    (mismo canal que el equipo usa para responderte).
+  </p>
 </main>

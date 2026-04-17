@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import {
   adminRoleGuard,
   buyerRoleGuard,
+  collaboratorRoleGuard,
 } from './core/presentation/guards/auth-role.guard';
 
 export const routes: Routes = [
@@ -23,6 +24,12 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/admin/admin.module').then((m) => m.AdminModule),
     canActivate: [adminRoleGuard],
+  },
+  {
+    path: 'collaborator',
+    loadChildren: () =>
+      import('./features/collaborator/collaborator.module').then((m) => m.CollaboratorModule),
+    canActivate: [collaboratorRoleGuard],
   },
   { path: '**', redirectTo: 'login' },
 ];

@@ -5,25 +5,6 @@ import { API_BASE_URL } from '../../config/api-base-url.token';
 import type { AuthUser, UserRole } from '../../domain/auth/auth-user.model';
 import { AUTH_SESSION_STORAGE_KEY } from './auth-session.storage';
 
-interface CredentialSeed extends AuthUser {
-  password: string;
-}
-
-const CREDENTIALS: CredentialSeed[] = [
-  {
-    email: 'comprador@donideli.com',
-    password: 'buyer123',
-    displayName: 'Comprador DoniDeli',
-    role: 'buyer',
-  },
-  {
-    email: 'admin@donideli.com',
-    password: 'admin123',
-    displayName: 'Admin DoniDeli',
-    role: 'admin',
-  },
-];
-
 interface ApiLoginResponse {
   id: number;
   email: string;
@@ -45,10 +26,7 @@ export class AuthSessionService {
 
   async login(email: string, password: string, role: UserRole): Promise<boolean> {
     const normalizedEmail = email.trim().toLowerCase();
-    if (this.apiBaseUrl) {
-      return this.loginWithApi(normalizedEmail, password, role);
-    }
-    return this.loginInMemory(normalizedEmail, password, role);
+    return this.loginWithApi(normalizedEmail, password, role);
   }
 
   logout(): void {
@@ -63,7 +41,13 @@ export class AuthSessionService {
   }
 
   redirectForRole(role: UserRole): string {
-    return role === 'admin' ? '/admin/productos' : '/buyer/inicio';
+    if (role === 'admin') {
+      return '/admin/productos';
+    }
+    if (role === 'collaborator') {
+      return '/collaborator/productos';
+    }
+    return '/buyer/inicio';
   }
 
   hydrateForTests(user: AuthUser): void {
@@ -75,7 +59,12 @@ export class AuthSessionService {
     password: string,
     role: UserRole,
   ): Promise<boolean> {
-    const path = role === 'buyer' ? '/compradores/login' : '/admins/login';
+    const path =
+      role === 'buyer'
+        ? '/compradores/login'
+        : role === 'collaborator'
+          ? '/colaboradores/login'
+          : '/admins/login';
     const url = `${this.apiBaseUrl.replace(/\/$/, '')}${path}`;
     try {
       const res = await firstValueFrom(
@@ -84,7 +73,12 @@ export class AuthSessionService {
           contrasena: password,
         }),
       );
-      const apiRole = res.role === 'admin' ? 'admin' : 'buyer';
+      const apiRole: UserRole =
+        res.role === 'admin'
+          ? 'admin'
+          : res.role === 'collaborator'
+            ? 'collaborator'
+            : 'buyer';
       if (apiRole !== role) {
         return false;
       }
@@ -101,33 +95,6 @@ export class AuthSessionService {
     } catch {
       return false;
     }
-  }
-
-  private loginInMemory(
-    normalizedEmail: string,
-    password: string,
-    role: UserRole,
-  ): boolean {
-    const match = CREDENTIALS.find(
-      (entry) =>
-        entry.email === normalizedEmail &&
-        entry.password === password &&
-        entry.role === role,
-    );
-
-    if (!match) {
-      return false;
-    }
-
-    const user: AuthUser = {
-      email: match.email,
-      displayName: match.displayName,
-      role: match.role,
-    };
-
-    this.currentUserState.set(user);
-    this.persistSession(user);
-    return true;
   }
 
   private persistSession(user: AuthUser): void {
@@ -153,12 +120,14 @@ export class AuthSessionService {
         parsed &&
         typeof parsed.email === 'string' &&
         typeof parsed.displayName === 'string' &&
-        (parsed.role === 'buyer' || parsed.role === 'admin')
+        (parsed.role === 'buyer' ||
+          parsed.role === 'admin' ||
+          parsed.role === 'collaborator')
       ) {
         return {
           email: parsed.email,
           displayName: parsed.displayName,
-          role: parsed.role,
+          role: parsed.role as UserRole,
           accessToken:
             typeof parsed.accessToken === 'string' ? parsed.accessToken : undefined,
           userId: typeof parsed.userId === 'string' ? parsed.userId : undefined,

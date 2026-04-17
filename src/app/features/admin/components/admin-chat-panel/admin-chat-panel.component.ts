@@ -2,6 +2,8 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostBinding,
+  Input,
   Output,
   ViewChild,
   inject,
@@ -16,6 +18,13 @@ import { AdminChatService } from '../../services/admin-chat.service';
   styleUrl: './admin-chat-panel.component.css',
 })
 export class AdminChatPanelComponent {
+  @Input() docked = false;
+
+  @HostBinding('class.admin-chat-panel--docked')
+  get hostDockedClass(): boolean {
+    return this.docked;
+  }
+
   @Output() closed = new EventEmitter<void>();
   @ViewChild('msgScroll') private msgScroll!: ElementRef<HTMLElement>;
 
@@ -51,6 +60,9 @@ export class AdminChatPanelComponent {
   }
 
   protected cerrar(): void {
+    if (this.docked) {
+      return;
+    }
     this.closed.emit();
   }
 

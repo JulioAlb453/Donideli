@@ -1,8 +1,9 @@
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { GetAllAdminOrdersUseCase } from '../../../../core/application/admin-orders/get-all-admin-orders.use-case';
+import { UpdateAdminOrderStatusUseCase } from '../../../../core/application/admin-orders/update-admin-order-status.use-case';
 import {
   filterAdminOrders,
   type AdminOrderStatusFilter,
@@ -17,14 +18,16 @@ import { NotificationService } from '../../../../shared/services/notification.se
   styleUrl: './admin-global-sales-page.component.css',
 })
 export class AdminGlobalSalesPageComponent {
-  private readonly authSession = inject(AuthSessionService);
-  private readonly router = inject(Router);
   private readonly getAllAdminOrders = inject(GetAllAdminOrdersUseCase);
+  private readonly updateAdminOrderStatus = inject(UpdateAdminOrderStatusUseCase);
   private readonly notificacion = inject(NotificationService);
 
-  private readonly allOrders = toSignal(this.getAllAdminOrders.execute(), {
-    initialValue: [] as AdminOrder[],
-  });
+  private readonly refreshTick = signal(0);
+
+  private readonly allOrders = toSignal(
+    toObservable(this.refreshTick).pipe(switchMap(() => this.getAllAdminOrders.execute())),
+    { initialValue: [] as AdminOrder[] },
+  );
 
   protected readonly statusFilter = signal<AdminOrderStatusFilter>('all');
   protected readonly searchQuery = signal('');
@@ -114,9 +117,16 @@ export class AdminGlobalSalesPageComponent {
     if (!confirmado) {
       return;
     }
-    const updated: AdminOrder = { ...order, status: nuevoEstado };
-    this.detailOrder.set(updated);
-    await this.notificacion.exito('Estado actualizado', `Pedido #${order.id} ahora es "${label}".`);
+    try {
+      await firstValueFrom(this.updateAdminOrderStatus.execute(order.id, nuevoEstado));
+      this.refreshTick.update((v) => v + 1);
+      const updated: AdminOrder = { ...order, status: nuevoEstado };
+      this.detailOrder.set(updated);
+      await this.notificacion.exito('Estado actualizado', `Pedido #${order.id} ahora es "${label}".`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'No se pudo guardar el estado.';
+      await this.notificacion.error('Error', msg);
+    }
   }
 
   protected nextStatusOptions(current: AdminOrderStatus): { id: AdminOrderStatus; label: string }[] {
@@ -162,18 +172,6 @@ export class AdminGlobalSalesPageComponent {
     }
   }
 
-  protected async logout(): Promise<void> {
-    const confirmado = await this.notificacion.confirmar(
-      'Cerrar sesión',
-      '¿Seguro que deseas salir del panel de administración?',
-      'Sí, salir',
-    );
-    if (confirmado) {
-      this.authSession.logout();
-      void this.router.navigateByUrl('/login', { replaceUrl: true });
-    }
-  }
-
   protected async exportCsv(): Promise<void> {
     try {
       const rows = this.filteredOrders();
@@ -186,6 +184,7 @@ export class AdminGlobalSalesPageComponent {
         'Total MXN',
         'Fecha',
         'Estado',
+        'Pago',
       ];
       const lines = [
         header.join(','),
@@ -199,6 +198,7 @@ export class AdminGlobalSalesPageComponent {
             String(o.totalMx),
             o.createdAtIso,
             this.statusLabel(o.status),
+            csvEscape(o.paymentMethod),
           ].join(','),
         ),
       ];

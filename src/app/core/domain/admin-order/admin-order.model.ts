@@ -14,4 +14,5 @@ export interface AdminOrder {
   totalMx: number;
   createdAtIso: string;
   status: AdminOrderStatus;
+  paymentMethod: string;
 }

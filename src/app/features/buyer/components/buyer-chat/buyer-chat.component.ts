@@ -1,15 +1,14 @@
 import {
   Component,
   ElementRef,
-  Input,
-  OnChanges,
-  OnDestroy,
-  SimpleChanges,
   ViewChild,
   inject,
   signal,
+  effect,
+  OnDestroy,
 } from '@angular/core';
 import { BuyerChatService } from '../../services/buyer-chat.service';
+import { BuyerChatContextService } from '../../services/buyer-chat-context.service';
 
 @Component({
   selector: 'app-buyer-chat',
@@ -17,22 +16,36 @@ import { BuyerChatService } from '../../services/buyer-chat.service';
   templateUrl: './buyer-chat.component.html',
   styleUrl: './buyer-chat.component.css',
 })
-export class BuyerChatComponent implements OnChanges, OnDestroy {
-  @Input() id_colaborador = '';
-  @Input() nombre = 'Colaborador';
-
+export class BuyerChatComponent implements OnDestroy {
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLElement>;
 
   protected readonly chat = inject(BuyerChatService);
-  protected readonly abierto = signal(false);
-  protected readonly texto_input = signal('');
+  private readonly ctx = inject(BuyerChatContextService);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['id_colaborador'] && this.id_colaborador) {
-      void this.chat.conectar().then(() => {
-        this.chat.entrar_room(this.id_colaborador);
+  protected readonly texto_input = signal('');
+  protected readonly abierto = this.ctx.panelAbierto.asReadonly();
+  protected readonly nombre = this.ctx.nombre.asReadonly();
+
+  constructor() {
+    effect(() => {
+      const id = this.ctx.idColaborador();
+      if (!id) {
+        return;
+      }
+      void this.chat.conectar().then(async () => {
+        await this.chat.entrar_room(id);
       });
-    }
+    });
+
+    effect(() => {
+      this.chat.setChatVisible(this.ctx.panelAbierto());
+    });
+
+    effect(() => {
+      if (this.ctx.panelAbierto()) {
+        setTimeout(() => this.scrollToBottom(), 50);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -40,17 +53,8 @@ export class BuyerChatComponent implements OnChanges, OnDestroy {
     this.chat.desconectar();
   }
 
-  protected toggle(): void {
-    this.abierto.update((v) => !v);
-    this.chat.setChatVisible(this.abierto());
-    if (this.abierto()) {
-      setTimeout(() => this.scrollToBottom(), 50);
-    }
-  }
-
   protected cerrar(): void {
-    this.abierto.set(false);
-    this.chat.setChatVisible(false);
+    this.ctx.closePanel();
   }
 
   protected onInput(event: Event): void {

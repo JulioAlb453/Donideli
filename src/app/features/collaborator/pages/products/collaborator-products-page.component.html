@@ -1,0 +1,277 @@
+<div class="flex min-w-0 flex-1 flex-col bg-primary-50">
+  <header
+    class="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4 border-b border-primary-200 bg-white/95 px-4 py-4 backdrop-blur md:px-8"
+  >
+    <h1 class="font-heading text-lg text-primary-900 md:text-xl">Mis platillos</h1>
+    <button
+      type="button"
+      class="font-heading rounded-xl bg-secondary-400 px-4 py-2.5 text-sm text-white shadow-sm transition hover:bg-secondary-500"
+      (click)="onNewProduct()"
+    >
+      + Nuevo platillo
+    </button>
+  </header>
+
+  <main class="doni-main-content flex-1 px-4 py-6 md:px-8 md:py-8">
+    <section
+      class="mx-auto max-w-5xl rounded-3xl border border-primary-100 bg-white p-5 shadow-md ring-1 ring-primary-50 md:p-8"
+      aria-labelledby="collab-products-heading"
+    >
+      <div class="mb-6">
+        <h2 id="collab-products-heading" class="font-heading text-2xl text-primary-900 md:text-3xl">
+          Tu menú público
+        </h2>
+        <p class="font-body mt-1 text-primary-600">
+          Los compradores ven estos productos en el catálogo. Usa el panel derecho para mensajes con clientes.
+        </p>
+      </div>
+
+      @if (listLoadError(); as err) {
+        <p
+          class="font-body mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          role="alert"
+        >
+          {{ err }}
+        </p>
+      }
+
+      <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4" aria-label="Resumen">
+        <div
+          class="rounded-2xl border border-primary-100 bg-primary-50/50 p-3 shadow-sm ring-1 ring-primary-50 sm:p-4"
+        >
+          <div class="flex items-center gap-2 text-primary-500">
+            <app-flaticon-icon class="h-7 w-7 sm:h-8 sm:w-8" name="donut" />
+            <span class="font-body text-[10px] uppercase text-primary-500 sm:text-xs">Total</span>
+          </div>
+          <p class="font-heading mt-1 text-2xl text-primary-900 sm:mt-2 sm:text-3xl">{{ kpis().total }}</p>
+        </div>
+        <div
+          class="rounded-2xl border border-primary-100 bg-primary-50/50 p-3 shadow-sm ring-1 ring-primary-50 sm:p-4"
+        >
+          <p class="font-body text-[10px] uppercase text-emerald-700 sm:text-xs">Activos</p>
+          <p class="font-heading mt-1 text-2xl text-primary-900 sm:mt-2 sm:text-3xl">{{ kpis().active }}</p>
+        </div>
+        <div
+          class="rounded-2xl border border-primary-100 bg-primary-50/50 p-3 shadow-sm ring-1 ring-primary-50 sm:p-4"
+        >
+          <p class="font-body text-[10px] uppercase text-amber-700 sm:text-xs">Agotados</p>
+          <p class="font-heading mt-1 text-2xl text-primary-900 sm:mt-2 sm:text-3xl">{{ kpis().outOfStock }}</p>
+        </div>
+      </div>
+
+      <div
+        class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+      >
+        <div class="font-body flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoría">
+          @for (opt of filterOptions; track opt.id) {
+            <button
+              type="button"
+              class="rounded-full border px-4 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400"
+              [class.border-transparent]="isCategoryActive(opt.id)"
+              [class.bg-secondary-400]="isCategoryActive(opt.id)"
+              [class.text-white]="isCategoryActive(opt.id)"
+              [class.border-primary-200]="!isCategoryActive(opt.id)"
+              [class.bg-white]="!isCategoryActive(opt.id)"
+              [class.text-primary-800]="!isCategoryActive(opt.id)"
+              [attr.aria-pressed]="isCategoryActive(opt.id)"
+              (click)="setCategory(opt.id)"
+            >
+              {{ opt.label }}
+            </button>
+          }
+        </div>
+        <div class="relative w-full max-w-md sm:flex-1">
+          <span
+            class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-primary-400"
+            aria-hidden="true"
+            >🔍</span
+          >
+          <input
+            type="search"
+            class="font-body w-full rounded-xl border border-primary-200 bg-white py-2.5 pl-10 pr-4 text-sm text-primary-900 placeholder:text-primary-400 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            placeholder="Buscar platillo…"
+            [value]="searchQuery()"
+            (input)="onSearchInput($event)"
+            aria-label="Buscar platillo"
+          />
+        </div>
+      </div>
+
+      @if (filteredProducts().length === 0) {
+        <p
+          class="font-body rounded-2xl border border-dashed border-primary-200 bg-primary-50/30 py-12 text-center text-primary-600"
+        >
+          @if (allProducts().length === 0 && !listLoadError()) {
+            Aún no tienes platillos publicados. Crea uno nuevo para aparecer en el catálogo.
+          } @else if (allProducts().length > 0) {
+            Ningún platillo coincide con el filtro o la búsqueda. Prueba «Todos» u otra categoría.
+          } @else {
+            No hay platillos que coincidan. Crea uno nuevo para aparecer en el catálogo.
+          }
+        </p>
+      } @else {
+        <div class="relative">
+          <button
+            type="button"
+            class="admin-product-slider-nav font-heading absolute left-0 top-1/2 z-[1] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-primary-200 bg-white text-lg text-primary-800 shadow-md transition hover:bg-primary-50 md:flex"
+            (click)="scrollProducts(-1)"
+            aria-label="Ver anteriores"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            class="admin-product-slider-nav font-heading absolute right-0 top-1/2 z-[1] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-primary-200 bg-white text-lg text-primary-800 shadow-md transition hover:bg-primary-50 md:flex"
+            (click)="scrollProducts(1)"
+            aria-label="Ver siguientes"
+          >
+            ›
+          </button>
+          <div
+            #productTrack
+            class="admin-product-track -mx-1 flex gap-4 overflow-x-auto pb-2 pl-1 pr-1 pt-1 md:mx-0 md:gap-5 md:px-12"
+            role="list"
+          >
+            @for (product of filteredProducts(); track product.id) {
+              <article
+                class="admin-product-slide relative flex w-[min(100%,17.5rem)] shrink-0 snap-start snap-always flex-col overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-md ring-1 ring-primary-50"
+                role="listitem"
+              >
+                <span
+                  class="absolute right-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide"
+                  [class.bg-emerald-100]="product.status === 'active'"
+                  [class.text-emerald-800]="product.status === 'active'"
+                  [class.bg-amber-100]="product.status === 'out_of_stock'"
+                  [class.text-amber-900]="product.status === 'out_of_stock'"
+                >
+                  {{ product.status === 'active' ? 'Activo' : 'Agotado' }}
+                </span>
+                <div class="flex justify-center bg-secondary-50/80 px-4 pb-2 pt-8">
+                  <app-flaticon-icon class="h-20 w-20" [name]="product.icon" />
+                </div>
+                <div class="flex flex-1 flex-col px-4 pb-4 pt-3">
+                  <h3 class="font-heading text-lg text-primary-900">{{ product.name }}</h3>
+                  <span
+                    class="font-body mt-2 inline-flex w-fit rounded-full bg-secondary-100 px-2.5 py-0.5 text-xs text-secondary-800"
+                  >
+                    {{ categoryLabel(product.category) }}
+                  </span>
+                  <p class="font-heading mt-3 text-xl text-secondary-500">${{ product.priceMx }} MXN</p>
+                  <p class="font-body mt-1 text-xs text-primary-600">Stock: {{ product.stock }}</p>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      type="button"
+                      class="font-heading flex-1 rounded-xl border border-primary-200 bg-white px-3 py-2 text-sm text-primary-800 transition hover:bg-primary-50"
+                      (click)="onEdit(product)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-xl border border-primary-200 px-3 py-2 text-primary-600 transition hover:bg-red-50 hover:text-red-700"
+                      aria-label="Eliminar"
+                      (click)="onDelete(product)"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  </main>
+</div>
+
+@if (modalAbierto()) {
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-primary-900/50 px-4 py-8 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'collab-product-form-title'"
+    (click)="cerrarModal()"
+  >
+    <div
+      class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-primary-100 bg-white p-6 shadow-xl ring-1 ring-primary-50 md:p-8"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="collab-product-form-title" class="font-heading text-xl text-primary-900 md:text-2xl">
+        {{ tituloModal() }}
+      </h2>
+      <p class="font-body mt-1 text-sm text-primary-600">
+        El platillo quedará publicado bajo tu perfil de colaborador en el catálogo.
+      </p>
+
+      <div class="mt-6 space-y-4">
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Nombre</span>
+          <input
+            type="text"
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formNombre()"
+            (input)="onFormNombre($event)"
+            autocomplete="off"
+          />
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Precio (MXN)</span>
+          <input
+            type="text"
+            inputmode="decimal"
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formPrecio()"
+            (input)="onFormPrecio($event)"
+          />
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Stock</span>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formStock()"
+            (input)="onFormStock($event)"
+          />
+        </label>
+        <label class="block">
+          <span class="font-body text-sm font-medium text-primary-800">Categoría</span>
+          <select
+            class="font-body mt-1 w-full rounded-xl border border-primary-200 bg-white px-3 py-2.5 text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+            [value]="formCategoria()"
+            (change)="onFormCategoriaChange($event)"
+          >
+            @for (opt of categoryOptions; track opt.id) {
+              <option [value]="opt.id">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <button
+          type="button"
+          class="font-heading flex-1 rounded-xl border border-primary-200 bg-white px-4 py-3 text-sm text-primary-800 transition hover:bg-primary-50 disabled:opacity-50"
+          [disabled]="formEnviando()"
+          (click)="cerrarModal()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="doni-press font-heading flex-1 rounded-xl bg-secondary-400 px-4 py-3 text-sm text-white shadow-sm transition hover:bg-secondary-500 disabled:opacity-50"
+          [disabled]="formEnviando()"
+          (click)="guardarFormulario()"
+        >
+          @if (formEnviando()) {
+            Guardando…
+          } @else {
+            Guardar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

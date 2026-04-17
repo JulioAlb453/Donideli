@@ -3,18 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 
-export interface ColaboradorRegistroPayload {
-  email: string;
-  display_name: string;
-  handle: string;
-  bio: string | null;
-  specialty: string;
-  product_count: number;
-  sales_count: number;
-  is_online: boolean;
-  status: string;
-}
-
 function mensajeErrorApi(err: unknown): string {
   if (err instanceof HttpErrorResponse) {
     const body = err.error as {
@@ -79,15 +67,26 @@ export class RegistrationService {
     }
   }
 
-  async registrarColaborador(
-    payload: ColaboradorRegistroPayload,
+
+  async activarCuentaColaborador(
+    email: string,
+    contrasena: string,
+    handle?: string,
   ): Promise<{ ok: true } | { ok: false; message: string }> {
     if (!this.tieneApi) {
       return { ok: false, message: 'Conecta el API (DONIDELI_API_BASE_URL) para registrarte.' };
     }
-    const url = `${this.apiBaseUrl.replace(/\/$/, '')}/colaboradores/`;
+    const url = `${this.apiBaseUrl.replace(/\/$/, '')}/colaboradores/activar-cuenta`;
+    const body: { email: string; contrasena: string; handle?: string } = {
+      email: email.trim().toLowerCase(),
+      contrasena,
+    };
+    const h = handle?.trim();
+    if (h) {
+      body.handle = h.startsWith('@') ? h : `@${h.replace(/^@+/, '')}`;
+    }
     try {
-      await firstValueFrom(this.http.post(url, payload));
+      await firstValueFrom(this.http.post(url, body));
       return { ok: true };
     } catch (e) {
       return { ok: false, message: mensajeErrorApi(e) };

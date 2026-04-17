@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.admin-product-track {
+  scroll-snap-type: x mandatory;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-product-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-product-track::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(203 213 225);
+}
+
+.admin-product-track::-webkit-scrollbar-track {
+  background: transparent;
+}

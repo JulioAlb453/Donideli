@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 const CONFIRM_COLOR = '#f472b6';
 const CANCEL_COLOR = '#6b7280';
 
-const ChatToast = Swal.mixin({
+const DoniToast = Swal.mixin({
   toast: true,
   position: 'top-end',
   showConfirmButton: false,
@@ -70,10 +70,28 @@ export class NotificationService {
 
   mensaje_chat(remitente: string, texto: string): void {
     const preview = texto.length > 60 ? texto.slice(0, 57) + '…' : texto;
-    void ChatToast.fire({
+    void DoniToast.fire({
       icon: 'info',
-      title: remitente,
-      text: preview,
+      title: 'Has recibido un nuevo mensaje',
+      text: `${remitente}: ${preview}`,
+      iconColor: CONFIRM_COLOR,
+    });
+  }
+
+  perfil_creado(detalle?: string): void {
+    void DoniToast.fire({
+      icon: 'success',
+      title: 'Perfil creado',
+      text: detalle ?? 'Tu cuenta se ha registrado correctamente.',
+      iconColor: CONFIRM_COLOR,
+    });
+  }
+
+  producto_agregado_al_carrito(nombreProducto: string): void {
+    void DoniToast.fire({
+      icon: 'success',
+      title: 'Producto añadido al carrito',
+      text: nombreProducto,
       iconColor: CONFIRM_COLOR,
     });
   }

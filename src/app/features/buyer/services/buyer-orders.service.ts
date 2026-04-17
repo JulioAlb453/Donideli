@@ -40,10 +40,11 @@ export class BuyerOrdersService {
     fecha_entrega: string;
     horario_entrega: string;
     lineas: BuyerOrderLine[];
+    id_pedido_prefijado?: string;
   }): BuyerOrder {
     const subtotal = input.lineas.reduce((s, l) => s + l.precio * l.cantidad, 0);
     const pedido: BuyerOrder = {
-      id_pedido: this.generarId(),
+      id_pedido: input.id_pedido_prefijado?.trim() || this.generarId(),
       id_colaborador: input.id_colaborador,
       email_colaborador: input.email_colaborador,
       fecha_creacion: new Date().toISOString(),
@@ -60,6 +61,14 @@ export class BuyerOrdersService {
     this.pedidos.update((prev) => [pedido, ...prev]);
     this.persist();
     return pedido;
+  }
+
+  eliminarSiExiste(id_pedido: string): void {
+    const list = this.pedidos().filter((p) => p.id_pedido !== id_pedido);
+    if (list.length !== this.pedidos().length) {
+      this.pedidos.set(list);
+      this.persist();
+    }
   }
 
   cancelar(id_pedido: string): boolean {
