@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, OnDestroy, inject } from '@angular/core';
+import { environment } from '../../../../environments/environment';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 export interface AdminChatMessage {
@@ -22,9 +23,8 @@ interface WSIncoming {
   data?: { texto: string; timestamp: number };
 }
 
-const WS_BASE = 'wb-donideli.fly.dev';
-const TOKEN_URL = `https://${WS_BASE}/auth/token`;
-const WS_URL = `wss://${WS_BASE}/ws`;
+const TOKEN_URL = `https://${environment.wsCollaborationHost}/auth/token`;
+const WS_URL = `wss://${environment.wsCollaborationHost}/ws`;
 const RECONNECT_DELAY = 3000;
 const ADMIN_USER_ID = 'admin@donideli.com';
 

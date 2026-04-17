@@ -81,6 +81,11 @@
             Entrar como {{ role() === 'admin' ? 'Administrador' : 'Comprador' }}
           </button>
         </form>
+
+        <p class="font-body mt-6 text-center text-sm text-primary-600">
+          ¿No tienes cuenta?
+          <a routerLink="/login/registro" class="font-medium text-secondary-500 hover:underline">Crear cuenta</a>
+        </p>
       </div>
     </div>
   </section>

@@ -1,0 +1,185 @@
+<main class="flex min-h-screen items-center justify-center bg-primary-50 px-4 py-12">
+  <section class="w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-primary-100">
+    <div class="grid md:grid-cols-2">
+      <div class="bg-primary-900 px-8 py-10 text-white">
+        <p class="font-heading text-3xl">DoniDeli</p>
+        <p class="font-body mt-3 text-primary-100">
+          Crea tu cuenta como comprador, administrador o solicita tu perfil de colaborador.
+        </p>
+        <p class="font-body mt-4 text-sm text-primary-200">
+          Comprador y administrador inician sesión con correo y contraseña. El colaborador registra su vitrina
+          (sin contraseña en el sistema actual); aparecerá en el listado de la app.
+        </p>
+      </div>
+
+      <div class="px-6 py-8 md:px-8 md:py-10">
+        <p class="font-heading text-2xl text-primary-900">Crear cuenta</p>
+        <p class="font-body mt-1 text-sm text-primary-600">Elige el tipo de registro.</p>
+
+        <div class="mt-6 flex flex-wrap gap-2 rounded-2xl bg-primary-50 p-1" role="tablist" aria-label="Tipo de registro">
+          <button
+            type="button"
+            class="font-body flex-1 min-w-[7rem] rounded-xl px-3 py-2 text-sm transition"
+            [class.bg-secondary-400]="tipo() === 'buyer'"
+            [class.text-white]="tipo() === 'buyer'"
+            [class.text-primary-700]="tipo() !== 'buyer'"
+            (click)="setTipo('buyer')"
+          >
+            Comprador
+          </button>
+          <button
+            type="button"
+            class="font-body flex-1 min-w-[7rem] rounded-xl px-3 py-2 text-sm transition"
+            [class.bg-secondary-400]="tipo() === 'admin'"
+            [class.text-white]="tipo() === 'admin'"
+            [class.text-primary-700]="tipo() !== 'admin'"
+            (click)="setTipo('admin')"
+          >
+            Administrador
+          </button>
+          <button
+            type="button"
+            class="font-body flex-1 min-w-[7rem] rounded-xl px-3 py-2 text-sm transition"
+            [class.bg-secondary-400]="tipo() === 'collaborator'"
+            [class.text-white]="tipo() === 'collaborator'"
+            [class.text-primary-700]="tipo() !== 'collaborator'"
+            (click)="setTipo('collaborator')"
+          >
+            Colaborador
+          </button>
+        </div>
+
+        <form class="mt-6 space-y-4" (ngSubmit)="submit()">
+          @if (tipo() === 'collaborator') {
+            <label class="font-body block text-sm text-primary-700">
+              Correo
+              <input
+                required
+                type="email"
+                name="email"
+                autocomplete="email"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="email()"
+                (input)="onEmailInput($event)"
+              />
+            </label>
+            <label class="font-body block text-sm text-primary-700">
+              Nombre público
+              <input
+                required
+                type="text"
+                name="displayName"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="displayName()"
+                (input)="onDisplayNameInput($event)"
+              />
+            </label>
+            <label class="font-body block text-sm text-primary-700">
+              Handle (ej. @mi.tienda)
+              <input
+                required
+                type="text"
+                name="handle"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="handle()"
+                (input)="onHandleInput($event)"
+              />
+            </label>
+            <label class="font-body block text-sm text-primary-700">
+              Especialidad
+              <select
+                name="specialty"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="specialty()"
+                (change)="onSpecialtyChange($event)"
+              >
+                <option value="donas">Donas</option>
+                <option value="galletas">Galletas</option>
+                <option value="bebidas">Bebidas</option>
+              </select>
+            </label>
+            <label class="font-body block text-sm text-primary-700">
+              Bio (opcional)
+              <textarea
+                name="bio"
+                rows="3"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="bio()"
+                (input)="onBioInput($event)"
+              ></textarea>
+            </label>
+          } @else {
+            <label class="font-body block text-sm text-primary-700">
+              Correo (será tu usuario único)
+              <input
+                required
+                type="email"
+                name="email"
+                autocomplete="email"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="email()"
+                (input)="onEmailInput($event)"
+              />
+            </label>
+            <label class="font-body block text-sm text-primary-700">
+              Contraseña (mín. 6 caracteres)
+              <input
+                required
+                type="password"
+                name="password"
+                autocomplete="new-password"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="password()"
+                (input)="onPasswordInput($event)"
+              />
+            </label>
+            <label class="font-body block text-sm text-primary-700">
+              Confirmar contraseña
+              <input
+                required
+                type="password"
+                name="passwordConfirm"
+                autocomplete="new-password"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="passwordConfirm()"
+                (input)="onPasswordConfirmInput($event)"
+              />
+            </label>
+          }
+
+          @if (errorMessage()) {
+            <p class="font-body rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+              {{ errorMessage() }}
+            </p>
+          }
+          @if (successMessage()) {
+            <p class="font-body rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+              {{ successMessage() }}
+            </p>
+          }
+
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="font-heading w-full rounded-xl bg-secondary-400 px-4 py-3 text-white transition hover:bg-secondary-500 disabled:opacity-60"
+          >
+            @if (submitting()) {
+              Procesando…
+            } @else {
+              @if (tipo() === 'collaborator') {
+                Registrar colaborador
+              } @else {
+                Registrarse como {{ tipo() === 'admin' ? 'Administrador' : 'Comprador' }}
+              }
+            }
+          </button>
+        </form>
+
+        <p class="font-body mt-6 text-center text-sm text-primary-600">
+          ¿Ya tienes cuenta?
+          <a routerLink="/login" class="font-medium text-secondary-500 hover:underline">Iniciar sesión</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>

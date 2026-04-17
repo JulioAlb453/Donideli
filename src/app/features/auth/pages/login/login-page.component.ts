@@ -51,8 +51,8 @@ export class LoginPageComponent {
     this.password.set((event.target as HTMLInputElement).value);
   }
 
-  protected submit(): void {
-    const ok = this.authSession.login(
+  protected async submit(): Promise<void> {
+    const ok = await this.authSession.login(
       this.email(),
       this.password(),
       this.role(),

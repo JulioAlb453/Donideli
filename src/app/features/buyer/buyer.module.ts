@@ -2,8 +2,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
-import { CollaboratorRepositoryPort } from '../../core/domain/collaborator/collaborator.repository.port';
-import { CollaboratorInMemoryRepository } from '../../core/infrastructure/collaborators/collaborator-in-memory.repository';
 import { GetActiveCollaboratorsUseCase } from '../../core/application/collaborators/get-active-collaborators.use-case';
 import { BuyerRoutingModule } from './buyer-routing.module';
 import { HomeComponent } from '../home/home.component';
@@ -31,12 +29,6 @@ import { BuyerChatComponent } from './components/buyer-chat/buyer-chat.component
     BuyerChatComponent,
   ],
   imports: [CommonModule, FormsModule, SharedModule, BuyerRoutingModule],
-  providers: [
-    {
-      provide: CollaboratorRepositoryPort,
-      useClass: CollaboratorInMemoryRepository,
-    },
-    GetActiveCollaboratorsUseCase,
-  ],
+  providers: [GetActiveCollaboratorsUseCase],
 })
 export class BuyerModule {}

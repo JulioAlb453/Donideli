@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../dist/donideli/browser');
-const port = process.env.PORT || 10000;;
+const port = process.env.PORT || 10000;
 const host = '0.0.0.0';
 
 if (!fs.existsSync(root)) {
@@ -55,7 +55,7 @@ function readAndSend(res, filePath) {
 }
 
 function sendCsrShell(res) {
-  fs.readFile(indexCsr, (err, data) => {
+  fs.readFile(spaShell, (err, data) => {
     if (err) return send(res, 404, 'No encontrado', { 'Content-Type': 'text/plain; charset=utf-8' });
     send(res, 200, data, {
       'Content-Type': 'text/html; charset=utf-8',

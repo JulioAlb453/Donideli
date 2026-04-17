@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, OnDestroy } from '@angular/core';
 import { AuthSessionService } from '../../../core/application/auth/auth-session.service';
+import { environment } from '../../../../environments/environment';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 export interface ChatMessage {
@@ -16,9 +17,8 @@ interface WSIncoming {
   data?: { texto: string; timestamp: number };
 }
 
-const WS_BASE = 'wb-donideli.fly.dev';
-const TOKEN_URL = `https://${WS_BASE}/auth/token`;
-const WS_URL = `wss://${WS_BASE}/ws`;
+const TOKEN_URL = `https://${environment.wsCollaborationHost}/auth/token`;
+const WS_URL = `wss://${environment.wsCollaborationHost}/ws`;
 const RECONNECT_DELAY = 3000;
 
 @Injectable({ providedIn: 'root' })
