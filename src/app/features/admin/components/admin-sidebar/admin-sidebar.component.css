@@ -1,5 +1,17 @@
+
 :host {
-  display: contents;
+  display: block;
+  width: 100%;
+}
+
+@media (min-width: 48rem) {
+  :host {
+    width: 18rem;
+    max-width: 18rem;
+    flex: 0 0 18rem;
+    align-self: stretch;
+    min-height: 100vh;
+  }
 }
 
 .admin-mobile-overlay {
