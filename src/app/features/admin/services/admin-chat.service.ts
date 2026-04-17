@@ -5,6 +5,7 @@ import {
   environment,
 } from '../../../../environments/environment';
 import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
+import { CollaborationChatApiService } from '../../../core/infrastructure/chat/collaboration-chat-api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 export interface AdminChatMessage {
@@ -36,6 +37,7 @@ const ADMIN_USER_ID = ADMIN_COLLABORATION_USER_ID;
 @Injectable({ providedIn: 'root' })
 export class AdminChatService implements OnDestroy {
   private readonly notificacion = inject(NotificationService);
+  private readonly chatApi = inject(CollaborationChatApiService);
   private ws: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
@@ -134,6 +136,7 @@ export class AdminChatService implements OnDestroy {
     }
 
     this.send({ type: 'join', room });
+    void this.hydrateRoom(room, buyer_id);
   }
 
   abrir_conversacion(room: string): void {
@@ -143,6 +146,9 @@ export class AdminChatService implements OnDestroy {
     if (conv && conv.no_leidos > 0) {
       convs.set(room, { ...conv, no_leidos: 0 });
       this._conversaciones.set(convs);
+    }
+    if (conv) {
+      void this.hydrateRoom(room, conv.buyer_id);
     }
   }
 
@@ -173,6 +179,8 @@ export class AdminChatService implements OnDestroy {
       });
       this._conversaciones.set(convs);
     }
+
+    void this.chatApi.guardarMensaje(room, texto.trim(), timestamp).catch(() => {});
   }
 
   ngOnDestroy(): void {
@@ -188,6 +196,9 @@ export class AdminChatService implements OnDestroy {
       this.send({ type: 'join', room });
     }
     const sender = msg.sender_id ?? 'desconocido';
+    if (sender.toLowerCase() === ADMIN_USER_ID.toLowerCase()) {
+      return;
+    }
     const texto = msg.data.texto;
     const convs = new Map(this._conversaciones());
     let conv = convs.get(room);
@@ -221,6 +232,45 @@ export class AdminChatService implements OnDestroy {
   private formatSender(email: string): string {
     const name = email.split('@')[0];
     return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  private async hydrateRoom(room: string, buyer_id: string): Promise<void> {
+    try {
+      const rows = await this.chatApi.listMensajes(room);
+      const adminLower = ADMIN_USER_ID.toLowerCase();
+      const fromApi = rows.map((m) => ({
+        sender_id: m.sender_id,
+        texto: m.texto,
+        timestamp: m.timestamp,
+        propio: m.sender_id.toLowerCase() === adminLower,
+      }));
+      const convs = new Map(this._conversaciones());
+      const prev = convs.get(room) ?? { room, buyer_id, mensajes: [], no_leidos: 0 };
+      convs.set(room, {
+        ...prev,
+        buyer_id: prev.buyer_id || buyer_id,
+        mensajes: this.mergeMensajes(prev.mensajes, fromApi),
+      });
+      this._conversaciones.set(convs);
+    } catch {
+      /* sin sesión u offline */
+    }
+  }
+
+  private mergeMensajes(
+    local: AdminChatMessage[],
+    fromApi: AdminChatMessage[],
+  ): AdminChatMessage[] {
+    const key = (m: AdminChatMessage) => `${m.timestamp}|${m.sender_id}|${m.texto}`;
+    const seen = new Set<string>();
+    const out: AdminChatMessage[] = [];
+    for (const m of [...local, ...fromApi].sort((a, b) => a.timestamp - b.timestamp)) {
+      const k = key(m);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(m);
+    }
+    return out;
   }
 
   private async fetchToken(): Promise<string> {
