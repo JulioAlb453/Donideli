@@ -9,6 +9,7 @@ import { BuyerNavbarComponent } from './components/buyer-navbar/buyer-navbar.com
 import { CollaboratorCardComponent } from './components/collaborator-card/collaborator-card.component';
 import { BuyerCollaboratorsPageComponent } from './pages/collaborators/buyer-collaborators-page.component';
 import { BuyerCollaboratorMenuPageComponent } from './pages/collaborator-menu/buyer-collaborator-menu-page.component';
+import { BuyerCatalogMenuPageComponent } from './pages/catalog-menu/buyer-catalog-menu-page.component';
 import { BuyerCartPageComponent } from './pages/cart/buyer-cart-page.component';
 import { BuyerCheckoutDatosPageComponent } from './pages/checkout/buyer-checkout-datos-page.component';
 import { BuyerCheckoutPagoPageComponent } from './pages/checkout/buyer-checkout-pago-page.component';
@@ -22,6 +23,7 @@ import { BuyerChatComponent } from './components/buyer-chat/buyer-chat.component
     CollaboratorCardComponent,
     BuyerCollaboratorsPageComponent,
     BuyerCollaboratorMenuPageComponent,
+    BuyerCatalogMenuPageComponent,
     BuyerCartPageComponent,
     BuyerCheckoutDatosPageComponent,
     BuyerCheckoutPagoPageComponent,

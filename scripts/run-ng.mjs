@@ -59,13 +59,17 @@ const apiBaseUrl = production
   ? (process.env.DONIDELI_API_BASE_URL ?? '')
   : (process.env.DONIDELI_API_BASE_URL ?? 'http://127.0.0.1:8000');
 
-const wsHost =
-  process.env.DONIDELI_WS_COLLABORATION_HOST ?? 'wb-donideli.fly.dev';
+/** Origen del servidor WB (chat): desarrollo → local; producción → Fly salvo que lo sobreescribas. */
+const wsOrigin = production
+  ? (process.env.DONIDELI_WS_COLLABORATION_ORIGIN ??
+    'https://wb-donideli.fly.dev')
+  : (process.env.DONIDELI_WS_COLLABORATION_ORIGIN ??
+    'http://127.0.0.1:8080');
 
 const definePairs = [
   ['__DONIDELI_PRODUCTION__', production ? 'true' : 'false'],
   ['__DONIDELI_API_BASE_URL__', JSON.stringify(apiBaseUrl)],
-  ['__DONIDELI_WS_COLLABORATION_HOST__', JSON.stringify(wsHost)],
+  ['__DONIDELI_WS_COLLABORATION_ORIGIN__', JSON.stringify(wsOrigin)],
 ];
 
 const defineArgs = definePairs.flatMap(([k, v]) => ['--define', `${k}=${v}`]);

@@ -11,7 +11,7 @@
 
       <nav class="font-body flex flex-wrap items-center gap-1 text-sm md:gap-6" aria-label="Principal">
         <a href="#inicio" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Inicio</a>
-        <a href="#menu" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Menu</a>
+        <a routerLink="/buyer/menu" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Menú</a>
         <a routerLink="/buyer/colaboradores" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Colaboradores</a>
         <a href="#promociones" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Promociones</a>
         <button
@@ -58,10 +58,10 @@
           </p>
           <a
             class="font-heading mt-6 text-primary-700 underline decoration-primary-500 underline-offset-4 transition hover:text-primary-900"
-            [routerLink]="menuColaboradorBasePath()"
+            routerLink="/buyer/menu"
             [queryParams]="{ category: cat.category }"
           >
-            Ver menu
+            Ver menú
           </a>
         </article>
       }

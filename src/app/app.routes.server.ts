@@ -6,6 +6,7 @@ export const serverRoutes: ServerRoute[] = [
 
   { path: 'buyer/inicio', renderMode: RenderMode.Client },
   { path: 'buyer/colaboradores', renderMode: RenderMode.Client },
+  { path: 'buyer/menu', renderMode: RenderMode.Client },
   { path: 'buyer/colaborador/:id/menu', renderMode: RenderMode.Client },
   { path: 'buyer/carrito', renderMode: RenderMode.Client },
   { path: 'buyer/checkout/datos', renderMode: RenderMode.Client },

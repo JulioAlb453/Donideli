@@ -15,7 +15,14 @@ export class ProductCatalogApiRepository {
     @Inject(API_BASE_URL) private readonly apiBaseUrl: string,
   ) {}
 
-  /** Menú público del colaborador: `GET /colaboradores/{id}/productos`. */
+  findPublicCatalog(): Observable<MenuProduct[]> {
+    const url = `${this.apiBaseUrl}/productos/`;
+    return this.http.get<ProductoListApiRow[]>(url).pipe(
+      map((rows) => (Array.isArray(rows) ? rows.map(mapApiRowToMenuProduct) : [])),
+      catchError(() => of([])),
+    );
+  }
+
   findMenuForCollaborator(colaboradorId: string | null): Observable<MenuProduct[]> {
     if (!colaboradorId) {
       return of([]);

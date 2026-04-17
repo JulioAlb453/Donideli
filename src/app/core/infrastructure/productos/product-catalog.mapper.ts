@@ -20,6 +20,9 @@ export interface MenuProduct {
   precio: number;
   categoria: CollaboratorCategory;
   etiquetas: string[];
+  shelfId: string;
+  shelfDisplayName: string;
+  shelfEmail: string;
 }
 
 export function normalizeProductCategory(raw: string | null | undefined): CollaboratorCategory {
@@ -58,6 +61,12 @@ function categoryToAdminIcon(cat: CollaboratorCategory): AdminProductCardIcon {
 
 export function mapApiRowToMenuProduct(row: ProductoListApiRow): MenuProduct {
   const categoria = normalizeProductCategory(row.categoria);
+  const cid = row.id_colaborador;
+  const shelfId =
+    typeof cid === 'number' && cid >= 1 ? String(cid) : 'donideli';
+  const rawName = row.colaborador_nombre?.trim();
+  const shelfDisplayName =
+    rawName && rawName !== '—' ? rawName : 'DoniDeli';
   return {
     id_producto: String(row.id),
     nombre: row.nombre,
@@ -65,6 +74,9 @@ export function mapApiRowToMenuProduct(row: ProductoListApiRow): MenuProduct {
     precio: row.precio,
     categoria,
     etiquetas: [],
+    shelfId,
+    shelfDisplayName,
+    shelfEmail: '',
   };
 }
 

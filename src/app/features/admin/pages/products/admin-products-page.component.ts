@@ -24,6 +24,7 @@ import {
 import type { AdminProduct } from '../../../../core/domain/admin-product/admin-product.model';
 import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-category-ui';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { BuyerCatalogRefreshService } from '../../../../core/application/buyer/buyer-catalog-refresh.service';
 import { AdminChatService } from '../../services/admin-chat.service';
 
 type FormMode = 'create' | 'edit';
@@ -44,6 +45,7 @@ export class AdminProductsPageComponent implements OnInit, OnDestroy {
   private readonly adminProductRepo = inject(AdminProductRepositoryPort);
   private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
   private readonly notificacion = inject(NotificationService);
+  private readonly buyerCatalogRefresh = inject(BuyerCatalogRefreshService);
   protected readonly adminChat = inject(AdminChatService);
   protected readonly chat_panel_abierto = signal(false);
 
@@ -251,6 +253,7 @@ export class AdminProductsPageComponent implements OnInit, OnDestroy {
       }
       this.modalAbierto.set(false);
       this.listVersion.update((v) => v + 1);
+      this.buyerCatalogRefresh.markStale();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Intenta de nuevo.';
       await this.notificacion.error('No se pudo guardar', msg);
@@ -272,6 +275,7 @@ export class AdminProductsPageComponent implements OnInit, OnDestroy {
       await firstValueFrom(this.adminProductRepo.delete(product.id));
       await this.notificacion.exito('Producto eliminado', `"${product.name}" fue eliminado.`);
       this.listVersion.update((v) => v + 1);
+      this.buyerCatalogRefresh.markStale();
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Intenta de nuevo.';
       await this.notificacion.error('No se pudo eliminar', msg);

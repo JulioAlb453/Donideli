@@ -1,5 +1,10 @@
 import { Injectable, signal, computed, OnDestroy, inject } from '@angular/core';
-import { environment } from '../../../../environments/environment';
+import {
+  collaborationTokenUrl,
+  collaborationWsUrl,
+  environment,
+} from '../../../../environments/environment';
+import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 export interface AdminChatMessage {
@@ -23,10 +28,10 @@ interface WSIncoming {
   data?: { texto: string; timestamp: number };
 }
 
-const TOKEN_URL = `https://${environment.wsCollaborationHost}/auth/token`;
-const WS_URL = `wss://${environment.wsCollaborationHost}/ws`;
+const TOKEN_URL = collaborationTokenUrl(environment.wsCollaborationOrigin);
+const WS_URL = collaborationWsUrl(environment.wsCollaborationOrigin);
 const RECONNECT_DELAY = 3000;
-const ADMIN_USER_ID = 'admin@donideli.com';
+const ADMIN_USER_ID = ADMIN_COLLABORATION_USER_ID;
 
 @Injectable({ providedIn: 'root' })
 export class AdminChatService implements OnDestroy {
@@ -178,6 +183,10 @@ export class AdminChatService implements OnDestroy {
     if (msg.type !== 'message' || !msg.data || !msg.room) return;
 
     const room = msg.room;
+    if (!this.joinedRooms.has(room)) {
+      this.joinedRooms.add(room);
+      this.send({ type: 'join', room });
+    }
     const sender = msg.sender_id ?? 'desconocido';
     const texto = msg.data.texto;
     const convs = new Map(this._conversaciones());

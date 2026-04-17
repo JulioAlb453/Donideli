@@ -1,6 +1,11 @@
 import { Injectable, signal, computed, OnDestroy } from '@angular/core';
 import { AuthSessionService } from '../../../core/application/auth/auth-session.service';
-import { environment } from '../../../../environments/environment';
+import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
+import {
+  collaborationTokenUrl,
+  collaborationWsUrl,
+  environment,
+} from '../../../../environments/environment';
 import { NotificationService } from '../../../shared/services/notification.service';
 
 export interface ChatMessage {
@@ -17,8 +22,8 @@ interface WSIncoming {
   data?: { texto: string; timestamp: number };
 }
 
-const TOKEN_URL = `https://${environment.wsCollaborationHost}/auth/token`;
-const WS_URL = `wss://${environment.wsCollaborationHost}/ws`;
+const TOKEN_URL = collaborationTokenUrl(environment.wsCollaborationOrigin);
+const WS_URL = collaborationWsUrl(environment.wsCollaborationOrigin);
 const RECONNECT_DELAY = 3000;
 
 @Injectable({ providedIn: 'root' })
@@ -110,7 +115,8 @@ export class BuyerChatService implements OnDestroy {
 
   entrar_room(id_colaborador: string): void {
     const userId = this.auth.currentUser()?.email ?? 'anonymous';
-    const parts = [userId, id_colaborador].sort();
+    const peer = this.normalizeChatPeer(id_colaborador);
+    const parts = [userId, peer].sort();
     const room = `chat:${parts[0]}:${parts[1]}`;
 
     if (this.currentRoom && this.currentRoom !== room) {
@@ -172,6 +178,22 @@ export class BuyerChatService implements OnDestroy {
   private formatSender(email: string): string {
     const name = email.split('@')[0];
     return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  /** shelfId u otros identificadores del catálogo central → mismo peer que usa el panel admin. */
+  private normalizeChatPeer(raw: string): string {
+    const t = raw.trim();
+    if (!t) {
+      return ADMIN_COLLABORATION_USER_ID;
+    }
+    if (t.includes('@')) {
+      return t;
+    }
+    const lower = t.toLowerCase();
+    if (lower === 'donideli' || lower === 'tienda' || lower === 'catalogo' || lower === 'donuts') {
+      return ADMIN_COLLABORATION_USER_ID;
+    }
+    return t;
   }
 
   private async fetchToken(): Promise<string> {
