@@ -1,10 +1,13 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, signal, computed, OnDestroy, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import {
   collaborationTokenUrl,
   collaborationWsUrl,
   environment,
 } from '../../../../environments/environment';
 import { AuthSessionService } from '../../../core/application/auth/auth-session.service';
+import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
 import { CollaborationChatApiService } from '../../../core/infrastructure/chat/collaboration-chat-api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
@@ -37,8 +40,11 @@ const RECONNECT_DELAY = 3000;
 @Injectable({ providedIn: 'root' })
 export class AdminChatService implements OnDestroy {
   private readonly auth = inject(AuthSessionService);
+  private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = inject(API_BASE_URL);
   private readonly notificacion = inject(NotificationService);
   private readonly chatApi = inject(CollaborationChatApiService);
+  private cachedCanonicalAdminPeer: string | null = null;
   private ws: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
@@ -82,6 +88,7 @@ export class AdminChatService implements OnDestroy {
 
     let token: string;
     try {
+      await this.resolveCanonicalAdminPeer();
       token = await this.fetchToken();
     } catch {
       this.scheduleReconnect();
@@ -124,9 +131,11 @@ export class AdminChatService implements OnDestroy {
     this.ws?.close();
     this.ws = null;
     this._conectado.set(false);
+    this.cachedCanonicalAdminPeer = null;
   }
 
-  entrar_room(buyer_id: string): void {
+  async entrar_room(buyer_id: string): Promise<void> {
+    await this.resolveCanonicalAdminPeer();
     const room = this.buildRoom(buyer_id);
     this.joinedRooms.add(room);
 
@@ -138,6 +147,15 @@ export class AdminChatService implements OnDestroy {
 
     this.send({ type: 'join', room });
     void this.hydrateRoom(room, buyer_id);
+  }
+
+  async abrir_chat_con_comprador(buyerId: string): Promise<void> {
+    const id = buyerId.trim();
+    if (!id) {
+      return;
+    }
+    await this.entrar_room(id);
+    this.abrir_conversacion(this.buildRoom(id));
   }
 
   abrir_conversacion(room: string): void {
@@ -175,7 +193,7 @@ export class AdminChatService implements OnDestroy {
         ...conv,
         mensajes: [
           ...conv.mensajes,
-          { sender_id: this.adminPeerId(), texto: texto.trim(), timestamp, propio: true },
+          { sender_id: this.wsUserId(), texto: texto.trim(), timestamp, propio: true },
         ],
       });
       this._conversaciones.set(convs);
@@ -197,7 +215,7 @@ export class AdminChatService implements OnDestroy {
       this.send({ type: 'join', room });
     }
     const sender = msg.sender_id ?? 'desconocido';
-    if (sender.toLowerCase() === this.adminPeerId().toLowerCase()) {
+    if (sender.toLowerCase() === this.wsUserId().toLowerCase()) {
       return;
     }
     const texto = msg.data.texto;
@@ -238,7 +256,7 @@ export class AdminChatService implements OnDestroy {
   private async hydrateRoom(room: string, buyer_id: string): Promise<void> {
     try {
       const rows = await this.chatApi.listMensajes(room);
-      const adminLower = this.adminPeerId().toLowerCase();
+      const adminLower = this.wsUserId().toLowerCase();
       const fromApi = rows.map((m) => ({
         sender_id: m.sender_id,
         texto: m.texto,
@@ -278,7 +296,7 @@ export class AdminChatService implements OnDestroy {
     const res = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: this.adminPeerId() }),
+      body: JSON.stringify({ user_id: this.wsUserId() }),
     });
     if (!res.ok) throw new Error('Token request failed');
     const data: { token: string } = await res.json();
@@ -286,25 +304,52 @@ export class AdminChatService implements OnDestroy {
   }
 
   private buildRoom(buyer_id: string): string {
-    const parts = [buyer_id, this.adminPeerId()].sort();
+    const parts = [buyer_id, this.roomAdminPeer()].sort();
     return `chat:${parts[0]}:${parts[1]}`;
   }
 
   private extractBuyerFromRoom(room: string): string {
-    const adminId = this.adminPeerId();
+    const adminLower = this.roomAdminPeer().toLowerCase();
     const parts = room.replace('chat:', '').split(':');
-    return parts.find((p) => p !== adminId) ?? parts[0];
+    return parts.find((p) => p.toLowerCase() !== adminLower) ?? parts[0];
   }
 
-  private adminPeerId(): string {
-    const u = this.auth.currentUser();
-    if (u?.role === 'admin') {
-      const id = u.email?.trim();
-      if (id) {
-        return id;
-      }
+  private async resolveCanonicalAdminPeer(): Promise<string> {
+    if (this.cachedCanonicalAdminPeer !== null) {
+      return this.cachedCanonicalAdminPeer;
     }
-    return ADMIN_COLLABORATION_USER_ID.trim() || 'admin';
+    const base = this.apiBaseUrl.replace(/\/$/, '');
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ peer_id?: string }>(`${base}/admins/contacto-chat`),
+      );
+      const id = res?.peer_id?.trim() ?? '';
+      this.cachedCanonicalAdminPeer = id || this.fallbackRoomPeer();
+    } catch {
+      this.cachedCanonicalAdminPeer = this.fallbackRoomPeer();
+    }
+    return this.cachedCanonicalAdminPeer;
+  }
+
+  private fallbackRoomPeer(): string {
+    const u = this.auth.currentUser();
+    if (u?.role === 'admin' && u.email?.trim()) {
+      return u.email.trim();
+    }
+    const fb = ADMIN_COLLABORATION_USER_ID.trim();
+    return fb || 'admin';
+  }
+
+  private roomAdminPeer(): string {
+    return this.cachedCanonicalAdminPeer ?? this.fallbackRoomPeer();
+  }
+
+  private wsUserId(): string {
+    const u = this.auth.currentUser();
+    if (u?.role === 'admin' && u.email?.trim()) {
+      return u.email.trim();
+    }
+    return this.fallbackRoomPeer();
   }
 
   private send(obj: Record<string, unknown>): void {

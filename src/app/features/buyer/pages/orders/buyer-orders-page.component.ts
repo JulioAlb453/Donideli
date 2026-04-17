@@ -7,11 +7,7 @@ import { BuyerOrdersService, type BuyerOrder } from '../../services/buyer-orders
 import { BuyerPedidosApiService } from '../../services/buyer-pedidos-api.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import Swal from 'sweetalert2';
-
-interface ChatTarget {
-  id_colaborador: string;
-  nombre: string;
-}
+import { BuyerChatContextService } from '../../services/buyer-chat-context.service';
 
 const POLL_MS = 8000;
 
@@ -42,6 +38,7 @@ export class BuyerOrdersPageComponent {
   private readonly authSession = inject(AuthSessionService);
   private readonly notificacion = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly chatCtx = inject(BuyerChatContextService);
 
   private readonly apiOrders = signal<BuyerOrder[]>([]);
 
@@ -52,8 +49,6 @@ export class BuyerOrdersPageComponent {
   protected readonly total_pedidos_vista = computed(() => this.pedidos_vista().length);
 
   protected readonly detalle_abierto = signal<BuyerOrder | null>(null);
-  protected readonly chat_target = signal<ChatTarget | null>(null);
-  protected readonly chat_abierto = computed(() => this.chat_target() !== null);
 
   protected readonly fecha_minima = new Date().toISOString().slice(0, 10);
 
@@ -204,14 +199,9 @@ export class BuyerOrdersPageComponent {
 
   protected abrir_chat(pedido: BuyerOrder): void {
     this.detalle_abierto.set(null);
-    this.chat_target.set({
-      id_colaborador: pedido.email_colaborador || pedido.id_colaborador,
-      nombre: pedido.nombre_colaborador,
-    });
-  }
-
-  protected cerrar_chat(): void {
-    this.chat_target.set(null);
+    const nombre = (pedido.nombre_colaborador ?? '').trim() || 'Colaborador';
+    this.chatCtx.setPeer(pedido.email_colaborador || pedido.id_colaborador, nombre);
+    this.chatCtx.openPanel();
   }
 
   protected formato_fecha(iso: string): string {

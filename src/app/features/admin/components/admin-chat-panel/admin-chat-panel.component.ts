@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Input,
   Output,
   ViewChild,
   inject,
@@ -16,6 +17,8 @@ import { AdminChatService } from '../../services/admin-chat.service';
   styleUrl: './admin-chat-panel.component.css',
 })
 export class AdminChatPanelComponent {
+  @Input() docked = false;
+
   @Output() closed = new EventEmitter<void>();
   @ViewChild('msgScroll') private msgScroll!: ElementRef<HTMLElement>;
 

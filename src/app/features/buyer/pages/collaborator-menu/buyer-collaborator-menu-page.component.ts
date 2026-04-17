@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest } from 'rxjs';
@@ -10,6 +10,7 @@ import { collaboratorCategoryToFlaticon } from '../../utils/collaborator-categor
 import { BuyerCartService } from '../../services/buyer-cart.service';
 import { ProductCatalogApiRepository } from '../../../../core/infrastructure/productos/product-catalog-api.repository';
 import type { MenuProduct } from '../../../../core/infrastructure/productos/product-catalog.mapper';
+import { BuyerChatContextService } from '../../services/buyer-chat-context.service';
 
 @Component({
   selector: 'app-buyer-collaborator-menu-page',
@@ -17,12 +18,13 @@ import type { MenuProduct } from '../../../../core/infrastructure/productos/prod
   templateUrl: './buyer-collaborator-menu-page.component.html',
   styleUrl: './buyer-collaborator-menu-page.component.css',
 })
-export class BuyerCollaboratorMenuPageComponent {
+export class BuyerCollaboratorMenuPageComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
   private readonly cart = inject(BuyerCartService);
   private readonly catalogRepo = inject(ProductCatalogApiRepository);
   private readonly catalogRefresh = inject(BuyerCatalogRefreshService);
+  private readonly chatCtx = inject(BuyerChatContextService);
 
   private readonly collaborators = toSignal(
     toObservable(this.catalogRefresh.epoch).pipe(
@@ -132,6 +134,21 @@ export class BuyerCollaboratorMenuPageComponent {
     const cats = new Set(catalog.map((p: MenuProduct) => p.categoria));
     return this.allCategoryLinks.filter((c) => cats.has(c.id));
   });
+
+  constructor() {
+    effect(() => {
+      const id = this.id_colaborador();
+      if (!id) {
+        return;
+      }
+      const email = this.email_colaborador().trim();
+      this.chatCtx.setPeer(email || id, this.nombre_colaborador());
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.chatCtx.resetToCentralChat();
+  }
 
   protected isActiveCategory(category: CollaboratorCategory): boolean {
     return this.selectedCategory() === category;

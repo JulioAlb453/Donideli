@@ -1,29 +1,5 @@
 <div class="min-h-screen bg-white">
-  <header class="border-b border-secondary-200/80 bg-secondary-300 px-4 py-3 shadow-sm md:px-6">
-    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
-      <a routerLink="/buyer/inicio" class="flex items-center gap-3 text-left text-primary-900 no-underline">
-        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 font-heading text-lg text-white" aria-hidden="true">D</span>
-        <span>
-          <span class="font-heading block text-xl leading-tight">DoniDeli</span>
-          <span class="font-body block text-xs text-primary-700">Sacia tu antojo</span>
-        </span>
-      </a>
-
-      <nav class="font-body flex flex-wrap items-center gap-1 text-sm md:gap-6" aria-label="Principal">
-        <a href="#inicio" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Inicio</a>
-        <a routerLink="/buyer/menu" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Menú</a>
-        <a routerLink="/buyer/colaboradores" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Colaboradores</a>
-        <a href="#promociones" class="doni-nav-link rounded-full px-3 py-2 text-primary-800 no-underline hover:bg-white/40">Promociones</a>
-        <button
-          type="button"
-          class="rounded-full px-3 py-2 text-primary-800 transition hover:bg-white/40"
-          (click)="logout()"
-        >
-          Cerrar sesión
-        </button>
-      </nav>
-    </div>
-  </header>
+  <app-buyer-navbar />
 
   <section id="inicio" class="doni-hero-block bg-secondary-300 px-4 py-16 text-center sm:py-20 md:py-24" aria-labelledby="hero-heading">
     <h1 id="hero-heading" class="font-heading text-5xl tracking-tight text-primary-800 sm:text-6xl md:text-7xl">

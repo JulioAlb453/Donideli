@@ -16,13 +16,19 @@ import { AdminGlobalSalesPageComponent } from './pages/global-sales/admin-global
 import { AdminFutureUpdatesPageComponent } from './pages/future-updates/admin-future-updates-page.component';
 import { AdminChatPanelComponent } from './components/admin-chat-panel/admin-chat-panel.component';
 import { AdminSidebarComponent } from './components/admin-sidebar/admin-sidebar.component';
+import { AdminPostulacionesSlideboxComponent } from './components/admin-postulaciones-slidebox/admin-postulaciones-slidebox.component';
+import { AdminPostulacionesPageComponent } from './pages/postulaciones/admin-postulaciones-page.component';
+import { AdminLayoutComponent } from './layout/admin-layout.component';
 
 @NgModule({
   declarations: [
+    AdminLayoutComponent,
     AdminProductsPageComponent,
     AdminGlobalSalesPageComponent,
+    AdminPostulacionesPageComponent,
     AdminFutureUpdatesPageComponent,
     AdminChatPanelComponent,
+    AdminPostulacionesSlideboxComponent,
     AdminSidebarComponent,
   ],
   imports: [CommonModule, SharedModule, AdminRoutingModule],

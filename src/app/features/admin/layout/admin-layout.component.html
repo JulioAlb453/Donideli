@@ -1,0 +1,16 @@
+<div
+  class="admin-layout flex min-h-screen flex-col bg-primary-50 md:flex-row md:items-stretch"
+>
+  <app-admin-sidebar (logoutClick)="logout()" />
+
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col md:flex-row">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+      <router-outlet />
+    </div>
+
+    <app-admin-chat-panel
+      class="admin-layout-chat shrink-0 border-t border-primary-200 md:h-screen md:max-h-screen md:w-96 md:shrink-0 md:border-l md:border-t-0"
+      [docked]="true"
+    />
+  </div>
+</div>
