@@ -10,10 +10,14 @@
         <p class="font-heading text-2xl text-primary-900">Iniciar sesión</p>
         <p class="font-body mt-1 text-sm text-primary-600">Selecciona tu tipo de usuario.</p>
 
-        <div class="mt-6 flex gap-2 rounded-2xl bg-primary-50 p-1" role="tablist" aria-label="Tipo de acceso">
+        <div
+          class="mt-6 flex flex-wrap gap-2 rounded-2xl bg-primary-50 p-1"
+          role="tablist"
+          aria-label="Tipo de acceso"
+        >
           <button
             type="button"
-            class="font-body flex-1 rounded-xl px-3 py-2 text-sm transition"
+            class="font-body min-w-[6.5rem] flex-1 rounded-xl px-3 py-2 text-sm transition"
             [class.bg-secondary-400]="role() === 'buyer'"
             [class.text-white]="role() === 'buyer'"
             [class.text-primary-700]="role() !== 'buyer'"
@@ -23,13 +27,23 @@
           </button>
           <button
             type="button"
-            class="font-body flex-1 rounded-xl px-3 py-2 text-sm transition"
+            class="font-body min-w-[6.5rem] flex-1 rounded-xl px-3 py-2 text-sm transition"
             [class.bg-secondary-400]="role() === 'admin'"
             [class.text-white]="role() === 'admin'"
             [class.text-primary-700]="role() !== 'admin'"
             (click)="setRole('admin')"
           >
             Administrador
+          </button>
+          <button
+            type="button"
+            class="font-body min-w-[6.5rem] flex-1 rounded-xl px-3 py-2 text-sm transition"
+            [class.bg-secondary-400]="role() === 'collaborator'"
+            [class.text-white]="role() === 'collaborator'"
+            [class.text-primary-700]="role() !== 'collaborator'"
+            (click)="setRole('collaborator')"
+          >
+            Colaborador
           </button>
         </div>
 
@@ -68,7 +82,14 @@
             type="submit"
             class="doni-press font-heading w-full rounded-xl bg-secondary-400 px-4 py-3 text-white transition hover:bg-secondary-500"
           >
-            Entrar como {{ role() === 'admin' ? 'Administrador' : 'Comprador' }}
+            Entrar como
+            {{
+              role() === 'admin'
+                ? 'Administrador'
+                : role() === 'collaborator'
+                  ? 'Colaborador'
+                  : 'Comprador'
+            }}
           </button>
         </form>
 

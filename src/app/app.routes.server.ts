@@ -21,5 +21,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'admin/proximas-actualizaciones/colaboradores', renderMode: RenderMode.Client },
   { path: 'admin/proximas-actualizaciones', renderMode: RenderMode.Client },
 
+  { path: 'collaborator/productos', renderMode: RenderMode.Client },
+
   { path: '**', renderMode: RenderMode.Prerender },
 ];

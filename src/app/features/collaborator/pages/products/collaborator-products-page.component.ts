@@ -1,11 +1,9 @@
 import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { catchError, of, switchMap, tap } from 'rxjs';
 import { GetAllAdminProductsUseCase } from '../../../../core/application/admin-products/get-all-admin-products.use-case';
 import { AdminProductRepositoryPort } from '../../../../core/domain/admin-product/admin-product.repository.port';
-import { CollaboratorRepositoryPort } from '../../../../core/domain/collaborator/collaborator.repository.port';
-import type { Collaborator, CollaboratorCategory } from '../../../../core/domain/collaborator/collaborator.model';
 import {
   filterAdminProducts,
   type AdminProductCategoryFilter,
@@ -14,33 +12,42 @@ import type { AdminProduct } from '../../../../core/domain/admin-product/admin-p
 import { collaboratorCategoryLabel } from '../../../buyer/utils/collaborator-category-ui';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { BuyerCatalogRefreshService } from '../../../../core/application/buyer/buyer-catalog-refresh.service';
+import type { CollaboratorCategory } from '../../../../core/domain/collaborator/collaborator.model';
+
 type FormMode = 'create' | 'edit';
 
 @Component({
-  selector: 'app-admin-products-page',
+  selector: 'app-collaborator-products-page',
   standalone: false,
-  templateUrl: './admin-products-page.component.html',
-  styleUrl: './admin-products-page.component.css',
+  templateUrl: './collaborator-products-page.component.html',
+  styleUrl: './collaborator-products-page.component.css',
 })
-export class AdminProductsPageComponent {
+export class CollaboratorProductsPageComponent {
   @ViewChild('productTrack', { read: ElementRef })
   private readonly productTrack?: ElementRef<HTMLElement>;
 
   private readonly getAllAdminProducts = inject(GetAllAdminProductsUseCase);
   private readonly adminProductRepo = inject(AdminProductRepositoryPort);
-  private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
   private readonly notificacion = inject(NotificationService);
   private readonly buyerCatalogRefresh = inject(BuyerCatalogRefreshService);
 
   private readonly listVersion = signal(0);
-  private readonly allProducts = toSignal(
-    toObservable(this.listVersion).pipe(switchMap(() => this.getAllAdminProducts.execute())),
+  protected readonly listLoadError = signal<string | null>(null);
+  protected readonly allProducts = toSignal(
+    toObservable(this.listVersion).pipe(
+      switchMap(() =>
+        this.getAllAdminProducts.execute().pipe(
+          tap(() => this.listLoadError.set(null)),
+          catchError((e) => {
+            const msg = e instanceof Error ? e.message : 'No se pudo cargar tu menú.';
+            this.listLoadError.set(msg);
+            return of([] as AdminProduct[]);
+          }),
+        ),
+      ),
+    ),
     { initialValue: [] as AdminProduct[] },
   );
-
-  protected readonly collaborators = toSignal(this.collaboratorRepo.findAllActive(), {
-    initialValue: [] as Collaborator[],
-  });
 
   protected readonly modalAbierto = signal(false);
   protected readonly formMode = signal<FormMode>('create');
@@ -49,11 +56,10 @@ export class AdminProductsPageComponent {
   protected readonly formPrecio = signal('');
   protected readonly formStock = signal('');
   protected readonly formCategoria = signal<CollaboratorCategory>('donas');
-  protected readonly formColaboradorId = signal('');
   protected readonly formEnviando = signal(false);
 
   protected readonly tituloModal = computed(() =>
-    this.formMode() === 'create' ? 'Nuevo producto' : 'Editar producto',
+    this.formMode() === 'create' ? 'Nuevo platillo' : 'Editar platillo',
   );
 
   protected readonly categoryFilter = signal<AdminProductCategoryFilter>('all');
@@ -74,12 +80,10 @@ export class AdminProductsPageComponent {
     const list = this.allProducts();
     const active = list.filter((p) => p.status === 'active').length;
     const outOfStock = list.filter((p) => p.status === 'out_of_stock').length;
-    const collaborators = new Set(list.map((p) => p.collaboratorName)).size;
     return {
       total: list.length,
       active,
       outOfStock,
-      collaborators,
     };
   });
 
@@ -123,10 +127,6 @@ export class AdminProductsPageComponent {
     }
   }
 
-  protected onFormColaboradorChange(event: Event): void {
-    this.formColaboradorId.set((event.target as HTMLSelectElement).value);
-  }
-
   protected abrirCrear(): void {
     this.formMode.set('create');
     this.editingId.set(null);
@@ -134,7 +134,6 @@ export class AdminProductsPageComponent {
     this.formPrecio.set('');
     this.formStock.set('0');
     this.formCategoria.set('donas');
-    this.formColaboradorId.set('');
     this.modalAbierto.set(true);
   }
 
@@ -152,16 +151,13 @@ export class AdminProductsPageComponent {
     this.formPrecio.set(String(product.priceMx));
     this.formStock.set(String(product.stock));
     this.formCategoria.set(product.category);
-    this.formColaboradorId.set(
-      product.collaboratorDbId != null ? String(product.collaboratorDbId) : '',
-    );
     this.modalAbierto.set(true);
   }
 
   protected async guardarFormulario(): Promise<void> {
     const nombre = this.formNombre().trim();
     if (!nombre) {
-      await this.notificacion.error('Datos incompletos', 'Indica el nombre del producto.');
+      await this.notificacion.error('Datos incompletos', 'Indica el nombre del platillo.');
       return;
     }
     const precio = Number(this.formPrecio().replace(',', '.'));
@@ -174,16 +170,6 @@ export class AdminProductsPageComponent {
       await this.notificacion.error('Datos incompletos', 'El stock debe ser un entero mayor o igual a 0.');
       return;
     }
-    const colStr = this.formColaboradorId().trim();
-    let idColaborador: number | null = null;
-    if (colStr !== '') {
-      const n = Number(colStr);
-      if (!Number.isInteger(n) || n < 1) {
-        await this.notificacion.error('Datos incompletos', 'Colaborador no válido.');
-        return;
-      }
-      idColaborador = n;
-    }
 
     const categoria = this.formCategoria();
     this.formEnviando.set(true);
@@ -195,10 +181,10 @@ export class AdminProductsPageComponent {
             precio,
             categoria,
             stock_disponible: stock,
-            id_colaborador: idColaborador,
+            id_colaborador: null,
           }),
         );
-        await this.notificacion.exito('Producto creado', `"${nombre}" se añadió al catálogo.`);
+        await this.notificacion.exito('Platillo creado', `"${nombre}" se añadió a tu menú.`);
       } else {
         const id = this.editingId();
         if (!id) {
@@ -210,12 +196,13 @@ export class AdminProductsPageComponent {
             precio,
             categoria,
             stock_disponible: stock,
-            id_colaborador: idColaborador,
           }),
         );
-        await this.notificacion.exito('Producto actualizado', `Los cambios en "${nombre}" se guardaron.`);
+        await this.notificacion.exito('Platillo actualizado', `Los cambios en "${nombre}" se guardaron.`);
       }
       this.modalAbierto.set(false);
+      this.categoryFilter.set('all');
+      this.searchQuery.set('');
       this.listVersion.update((v) => v + 1);
       this.buyerCatalogRefresh.markStale();
     } catch (e) {
@@ -228,8 +215,8 @@ export class AdminProductsPageComponent {
 
   protected async onDelete(product: AdminProduct): Promise<void> {
     const confirmado = await this.notificacion.confirmar(
-      'Eliminar producto',
-      `¿Eliminar "${product.name}" del catálogo? Esta acción no se puede deshacer.`,
+      'Eliminar platillo',
+      `¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`,
       'Sí, eliminar',
     );
     if (!confirmado) {
@@ -237,7 +224,7 @@ export class AdminProductsPageComponent {
     }
     try {
       await firstValueFrom(this.adminProductRepo.delete(product.id));
-      await this.notificacion.exito('Producto eliminado', `"${product.name}" fue eliminado.`);
+      await this.notificacion.exito('Eliminado', `"${product.name}" fue eliminado.`);
       this.listVersion.update((v) => v + 1);
       this.buyerCatalogRefresh.markStale();
     } catch (e) {

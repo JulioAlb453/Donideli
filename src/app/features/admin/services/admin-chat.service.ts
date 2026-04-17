@@ -44,7 +44,9 @@ export class AdminChatService implements OnDestroy {
   private readonly apiBaseUrl = inject(API_BASE_URL);
   private readonly notificacion = inject(NotificationService);
   private readonly chatApi = inject(CollaborationChatApiService);
-  private cachedCanonicalAdminPeer: string | null = null;
+  private lastResolvedContactoPeer = '';
+  private contactoPeerInflight: Promise<string> | null = null;
+  private conectarInflight: Promise<void> | null = null;
   private ws: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
@@ -80,6 +82,19 @@ export class AdminChatService implements OnDestroy {
   });
 
   async conectar(): Promise<void> {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      return;
+    }
+    if (this.conectarInflight) {
+      return this.conectarInflight;
+    }
+    this.conectarInflight = this.ejecutarConexion().finally(() => {
+      this.conectarInflight = null;
+    });
+    return this.conectarInflight;
+  }
+
+  private async ejecutarConexion(): Promise<void> {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
@@ -88,10 +103,14 @@ export class AdminChatService implements OnDestroy {
 
     let token: string;
     try {
-      await this.resolveCanonicalAdminPeer();
+      await this.fetchCanonicalAdminPeer();
       token = await this.fetchToken();
     } catch {
       this.scheduleReconnect();
+      return;
+    }
+
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
@@ -131,11 +150,11 @@ export class AdminChatService implements OnDestroy {
     this.ws?.close();
     this.ws = null;
     this._conectado.set(false);
-    this.cachedCanonicalAdminPeer = null;
+    this.lastResolvedContactoPeer = '';
   }
 
   async entrar_room(buyer_id: string): Promise<void> {
-    await this.resolveCanonicalAdminPeer();
+    await this.fetchCanonicalAdminPeer();
     const room = this.buildRoom(buyer_id);
     this.joinedRooms.add(room);
 
@@ -314,21 +333,29 @@ export class AdminChatService implements OnDestroy {
     return parts.find((p) => p.toLowerCase() !== adminLower) ?? parts[0];
   }
 
-  private async resolveCanonicalAdminPeer(): Promise<string> {
-    if (this.cachedCanonicalAdminPeer !== null) {
-      return this.cachedCanonicalAdminPeer;
+  private fetchCanonicalAdminPeer(): Promise<string> {
+    if (!this.contactoPeerInflight) {
+      this.contactoPeerInflight = this.loadContactoPeerFromApi().finally(() => {
+        this.contactoPeerInflight = null;
+      });
     }
+    return this.contactoPeerInflight;
+  }
+
+  private async loadContactoPeerFromApi(): Promise<string> {
     const base = this.apiBaseUrl.replace(/\/$/, '');
+    let out: string;
     try {
       const res = await firstValueFrom(
         this.http.get<{ peer_id?: string }>(`${base}/admins/contacto-chat`),
       );
       const id = res?.peer_id?.trim() ?? '';
-      this.cachedCanonicalAdminPeer = id || this.fallbackRoomPeer();
+      out = id || this.fallbackRoomPeer();
     } catch {
-      this.cachedCanonicalAdminPeer = this.fallbackRoomPeer();
+      out = this.fallbackRoomPeer();
     }
-    return this.cachedCanonicalAdminPeer;
+    this.lastResolvedContactoPeer = out;
+    return out;
   }
 
   private fallbackRoomPeer(): string {
@@ -341,12 +368,16 @@ export class AdminChatService implements OnDestroy {
   }
 
   private roomAdminPeer(): string {
-    return this.cachedCanonicalAdminPeer ?? this.fallbackRoomPeer();
+    const v = this.lastResolvedContactoPeer.trim();
+    if (v) {
+      return v;
+    }
+    return this.fallbackRoomPeer();
   }
 
   private wsUserId(): string {
     const u = this.auth.currentUser();
-    if (u?.role === 'admin' && u.email?.trim()) {
+    if ((u?.role === 'admin' || u?.role === 'collaborator') && u.email?.trim()) {
       return u.email.trim();
     }
     return this.fallbackRoomPeer();

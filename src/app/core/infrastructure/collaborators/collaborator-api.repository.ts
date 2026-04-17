@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { API_BASE_URL } from '../../config/api-base-url.token';
 import { CollaboratorRepositoryPort } from '../../domain/collaborator/collaborator.repository.port';
 import type { Collaborator, CollaboratorCategory, CollaboratorStatus } from '../../domain/collaborator/collaborator.model';
+import { normalizeProductCategory } from '../productos/product-catalog.mapper';
 
 interface CollaboratorApiRow {
   id: string;
@@ -45,7 +46,7 @@ export class CollaboratorApiRepository extends CollaboratorRepositoryPort {
       displayName: r.displayName,
       handle: r.handle,
       bio: r.bio ?? '',
-      specialty: r.specialty as CollaboratorCategory,
+      specialty: normalizeProductCategory(r.specialty),
       productCount: r.productCount,
       salesCount: r.salesCount,
       isOnline: Boolean(r.isOnline),

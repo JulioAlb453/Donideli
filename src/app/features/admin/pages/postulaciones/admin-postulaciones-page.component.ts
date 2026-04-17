@@ -1,10 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { API_BASE_URL } from '../../../../core/config/api-base-url.token';
-import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import type { AdminPostulacionRow } from './admin-postulacion.model';
 
@@ -22,8 +20,6 @@ interface ApiListResponse {
 export class AdminPostulacionesPageComponent {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = inject(API_BASE_URL);
-  private readonly authSession = inject(AuthSessionService);
-  private readonly router = inject(Router);
   private readonly notificacion = inject(NotificationService);
 
   private readonly refreshTick = signal(0);
@@ -70,17 +66,6 @@ export class AdminPostulacionesPageComponent {
     this.slidebox_abierto.set(false);
   }
 
-  protected async logout(): Promise<void> {
-    const confirmado = await this.notificacion.confirmar(
-      'Cerrar sesión',
-      '¿Seguro que deseas salir del panel de administración?',
-      'Sí, salir',
-    );
-    if (confirmado) {
-      this.authSession.logout();
-      void this.router.navigateByUrl('/login', { replaceUrl: true });
-    }
-  }
 }
 
 function mensajeErrorLista(err: unknown): string {

@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -20,6 +20,7 @@ import { BuyerChatContextService } from '../../services/buyer-chat-context.servi
 })
 export class BuyerCollaboratorMenuPageComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly collaboratorRepo = inject(CollaboratorRepositoryPort);
   private readonly cart = inject(BuyerCartService);
   private readonly catalogRepo = inject(ProductCatalogApiRepository);
@@ -136,6 +137,30 @@ export class BuyerCollaboratorMenuPageComponent implements OnDestroy {
   });
 
   constructor() {
+    effect(() => {
+      const id = this.id_colaborador();
+      if (!id) {
+        return;
+      }
+      const catalog = this.allCollaboratorProducts();
+      const selected = this.selectedCategory();
+      if (catalog.length === 0) {
+        return;
+      }
+      const withProducts = new Set(catalog.map((p: MenuProduct) => p.categoria));
+      if (withProducts.has(selected)) {
+        return;
+      }
+      const fallback = this.allCategoryLinks.find((c) => withProducts.has(c.id))?.id;
+      if (!fallback) {
+        return;
+      }
+      void this.router.navigate(['/buyer/colaborador', id, 'menu'], {
+        queryParams: { category: fallback },
+        replaceUrl: true,
+      });
+    });
+
     effect(() => {
       const id = this.id_colaborador();
       if (!id) {

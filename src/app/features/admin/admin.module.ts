@@ -10,11 +10,11 @@ import { AdminOrderApiRepository } from '../../core/infrastructure/admin-orders/
 import { GetAllAdminProductsUseCase } from '../../core/application/admin-products/get-all-admin-products.use-case';
 import { GetAllAdminOrdersUseCase } from '../../core/application/admin-orders/get-all-admin-orders.use-case';
 import { UpdateAdminOrderStatusUseCase } from '../../core/application/admin-orders/update-admin-order-status.use-case';
+import { AdminChatPanelModule } from './admin-chat-panel.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminProductsPageComponent } from './pages/products/admin-products-page.component';
 import { AdminGlobalSalesPageComponent } from './pages/global-sales/admin-global-sales-page.component';
 import { AdminFutureUpdatesPageComponent } from './pages/future-updates/admin-future-updates-page.component';
-import { AdminChatPanelComponent } from './components/admin-chat-panel/admin-chat-panel.component';
 import { AdminSidebarComponent } from './components/admin-sidebar/admin-sidebar.component';
 import { AdminPostulacionesSlideboxComponent } from './components/admin-postulaciones-slidebox/admin-postulaciones-slidebox.component';
 import { AdminPostulacionesPageComponent } from './pages/postulaciones/admin-postulaciones-page.component';
@@ -27,11 +27,10 @@ import { AdminLayoutComponent } from './layout/admin-layout.component';
     AdminGlobalSalesPageComponent,
     AdminPostulacionesPageComponent,
     AdminFutureUpdatesPageComponent,
-    AdminChatPanelComponent,
     AdminPostulacionesSlideboxComponent,
     AdminSidebarComponent,
   ],
-  imports: [CommonModule, SharedModule, AdminRoutingModule],
+  imports: [CommonModule, SharedModule, AdminChatPanelModule, AdminRoutingModule],
   providers: [
     {
       provide: AdminProductRepositoryPort,

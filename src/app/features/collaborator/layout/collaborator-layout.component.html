@@ -1,10 +1,9 @@
 <div
   class="admin-layout flex min-h-screen flex-col bg-primary-50 md:flex-row md:items-stretch"
 >
-  <app-admin-sidebar (logoutClick)="logout()" />
+  <app-collaborator-sidebar (logoutClick)="logout()" />
 
   <div class="flex min-h-0 min-w-0 flex-1 flex-col md:flex-row">
-    <!-- Contenido de la ruta: scroll independiente; el chat permanece visible -->
     <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
       <router-outlet />
     </div>

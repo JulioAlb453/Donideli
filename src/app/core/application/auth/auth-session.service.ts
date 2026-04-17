@@ -41,7 +41,13 @@ export class AuthSessionService {
   }
 
   redirectForRole(role: UserRole): string {
-    return role === 'admin' ? '/admin/productos' : '/buyer/inicio';
+    if (role === 'admin') {
+      return '/admin/productos';
+    }
+    if (role === 'collaborator') {
+      return '/collaborator/productos';
+    }
+    return '/buyer/inicio';
   }
 
   hydrateForTests(user: AuthUser): void {
@@ -53,7 +59,12 @@ export class AuthSessionService {
     password: string,
     role: UserRole,
   ): Promise<boolean> {
-    const path = role === 'buyer' ? '/compradores/login' : '/admins/login';
+    const path =
+      role === 'buyer'
+        ? '/compradores/login'
+        : role === 'collaborator'
+          ? '/colaboradores/login'
+          : '/admins/login';
     const url = `${this.apiBaseUrl.replace(/\/$/, '')}${path}`;
     try {
       const res = await firstValueFrom(
@@ -62,7 +73,12 @@ export class AuthSessionService {
           contrasena: password,
         }),
       );
-      const apiRole = res.role === 'admin' ? 'admin' : 'buyer';
+      const apiRole: UserRole =
+        res.role === 'admin'
+          ? 'admin'
+          : res.role === 'collaborator'
+            ? 'collaborator'
+            : 'buyer';
       if (apiRole !== role) {
         return false;
       }
@@ -104,12 +120,14 @@ export class AuthSessionService {
         parsed &&
         typeof parsed.email === 'string' &&
         typeof parsed.displayName === 'string' &&
-        (parsed.role === 'buyer' || parsed.role === 'admin')
+        (parsed.role === 'buyer' ||
+          parsed.role === 'admin' ||
+          parsed.role === 'collaborator')
       ) {
         return {
           email: parsed.email,
           displayName: parsed.displayName,
-          role: parsed.role,
+          role: parsed.role as UserRole,
           accessToken:
             typeof parsed.accessToken === 'string' ? parsed.accessToken : undefined,
           userId: typeof parsed.userId === 'string' ? parsed.userId : undefined,

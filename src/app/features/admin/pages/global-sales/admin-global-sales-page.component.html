@@ -1,7 +1,4 @@
-<div class="admin-layout flex min-h-screen flex-col bg-primary-50 md:flex-row">
-  <app-admin-sidebar (logoutClick)="logout()" />
-
-  <div class="flex min-w-0 flex-1 flex-col">
+<div class="flex min-w-0 flex-1 flex-col bg-primary-50">
     <header
       class="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4 border-b border-primary-200 bg-white/95 px-4 py-4 backdrop-blur md:px-8"
     >
@@ -257,7 +254,6 @@
         }
       </section>
     </main>
-  </div>
 </div>
 
 @if (detailOrder(); as order) {

@@ -37,7 +37,8 @@ export class BuyerChatService implements OnDestroy {
   private cachedToken = '';
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
-  private cachedStoreAdminPeer: string | null = null;
+  private storePeerInflight: Promise<string> | null = null;
+  private conectarInflight: Promise<void> | null = null;
 
   private readonly auth = inject(AuthSessionService);
   private readonly http = inject(HttpClient);
@@ -60,6 +61,19 @@ export class BuyerChatService implements OnDestroy {
   }
 
   async conectar(): Promise<void> {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      return;
+    }
+    if (this.conectarInflight) {
+      return this.conectarInflight;
+    }
+    this.conectarInflight = this.ejecutarConexion().finally(() => {
+      this.conectarInflight = null;
+    });
+    return this.conectarInflight;
+  }
+
+  private async ejecutarConexion(): Promise<void> {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
@@ -70,6 +84,10 @@ export class BuyerChatService implements OnDestroy {
       this.cachedToken = await this.fetchToken();
     } catch {
       this.scheduleReconnect();
+      return;
+    }
+
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
@@ -114,7 +132,6 @@ export class BuyerChatService implements OnDestroy {
     this._conectado.set(false);
     this._room_activo.set('');
     this.currentRoom = '';
-    this.cachedStoreAdminPeer = null;
   }
 
   async entrar_room(id_colaborador: string): Promise<void> {
@@ -213,21 +230,26 @@ export class BuyerChatService implements OnDestroy {
     }
   }
 
-  private async resolveStoreAdminPeer(): Promise<string> {
-    if (this.cachedStoreAdminPeer !== null) {
-      return this.cachedStoreAdminPeer;
+  private resolveStoreAdminPeer(): Promise<string> {
+    if (!this.storePeerInflight) {
+      this.storePeerInflight = this.fetchStorePeerFromApi().finally(() => {
+        this.storePeerInflight = null;
+      });
     }
+    return this.storePeerInflight;
+  }
+
+  private async fetchStorePeerFromApi(): Promise<string> {
     const base = this.apiBaseUrl.replace(/\/$/, '');
     try {
       const res = await firstValueFrom(
         this.http.get<{ peer_id?: string }>(`${base}/admins/contacto-chat`),
       );
       const id = res?.peer_id?.trim() ?? '';
-      this.cachedStoreAdminPeer = id || this.fallbackStorePeer();
+      return id || this.fallbackStorePeer();
     } catch {
-      this.cachedStoreAdminPeer = this.fallbackStorePeer();
+      return this.fallbackStorePeer();
     }
-    return this.cachedStoreAdminPeer;
   }
 
   private fallbackStorePeer(): string {

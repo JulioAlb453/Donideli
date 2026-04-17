@@ -1,9 +1,7 @@
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import { GetAllAdminOrdersUseCase } from '../../../../core/application/admin-orders/get-all-admin-orders.use-case';
 import { UpdateAdminOrderStatusUseCase } from '../../../../core/application/admin-orders/update-admin-order-status.use-case';
 import {
@@ -20,8 +18,6 @@ import { NotificationService } from '../../../../shared/services/notification.se
   styleUrl: './admin-global-sales-page.component.css',
 })
 export class AdminGlobalSalesPageComponent {
-  private readonly authSession = inject(AuthSessionService);
-  private readonly router = inject(Router);
   private readonly getAllAdminOrders = inject(GetAllAdminOrdersUseCase);
   private readonly updateAdminOrderStatus = inject(UpdateAdminOrderStatusUseCase);
   private readonly notificacion = inject(NotificationService);
@@ -173,18 +169,6 @@ export class AdminGlobalSalesPageComponent {
         return 'Entregado';
       case 'cancelled':
         return 'Cancelado';
-    }
-  }
-
-  protected async logout(): Promise<void> {
-    const confirmado = await this.notificacion.confirmar(
-      'Cerrar sesión',
-      '¿Seguro que deseas salir del panel de administración?',
-      'Sí, salir',
-    );
-    if (confirmado) {
-      this.authSession.logout();
-      void this.router.navigateByUrl('/login', { replaceUrl: true });
     }
   }
 

@@ -4,11 +4,11 @@
       <div class="bg-primary-900 px-8 py-10 text-white">
         <p class="font-heading text-3xl">DoniDeli</p>
         <p class="font-body mt-3 text-primary-100">
-          Crea tu cuenta como comprador, administrador o solicita tu perfil de colaborador.
+          Crea tu cuenta como comprador o administrador, o activa tu acceso de colaborador tras ser aceptado.
         </p>
         <p class="font-body mt-4 text-sm text-primary-200">
-          Comprador y administrador inician sesión con correo y contraseña. El colaborador registra su vitrina
-          (sin contraseña en el sistema actual); aparecerá en el listado de la app.
+          Si postulaste como colaborador, cuando el equipo marque tu solicitud como aceptada podrás usar aquí el mismo
+          correo para definir tu contraseña y entrar al panel (sin repetir nombre ni especialidad).
         </p>
       </div>
 
@@ -51,8 +51,12 @@
 
         <form class="mt-6 space-y-4" (ngSubmit)="submit()">
           @if (tipo() === 'collaborator') {
+            <p class="font-body rounded-xl bg-primary-50 px-3 py-2 text-sm text-primary-700">
+              Usa el <strong>mismo correo</strong> que en tu postulación. El sistema comprueba que esté
+              <strong>aceptada</strong> antes de crear tu cuenta.
+            </p>
             <label class="font-body block text-sm text-primary-700">
-              Correo
+              Correo de la postulación
               <input
                 required
                 type="email"
@@ -64,49 +68,40 @@
               />
             </label>
             <label class="font-body block text-sm text-primary-700">
-              Nombre público
+              Contraseña (mín. 6 caracteres)
               <input
                 required
-                type="text"
-                name="displayName"
+                type="password"
+                name="password"
+                autocomplete="new-password"
                 class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
-                [value]="displayName()"
-                (input)="onDisplayNameInput($event)"
+                [value]="password()"
+                (input)="onPasswordInput($event)"
               />
             </label>
             <label class="font-body block text-sm text-primary-700">
-              Handle (ej. @mi.tienda)
+              Confirmar contraseña
               <input
                 required
-                type="text"
-                name="handle"
+                type="password"
+                name="passwordConfirm"
+                autocomplete="new-password"
                 class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
-                [value]="handle()"
-                (input)="onHandleInput($event)"
+                [value]="passwordConfirm()"
+                (input)="onPasswordConfirmInput($event)"
               />
             </label>
             <label class="font-body block text-sm text-primary-700">
-              Especialidad
-              <select
-                name="specialty"
-                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
-                [value]="specialty()"
-                (change)="onSpecialtyChange($event)"
-              >
-                <option value="donas">Donas</option>
-                <option value="galletas">Galletas</option>
-                <option value="bebidas">Bebidas</option>
-              </select>
-            </label>
-            <label class="font-body block text-sm text-primary-700">
-              Bio (opcional)
-              <textarea
-                name="bio"
-                rows="3"
-                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
-                [value]="bio()"
-                (input)="onBioInput($event)"
-              ></textarea>
+              Handle público (opcional, ej. &#64;mi.tienda)
+              <input
+                type="text"
+                name="handleColab"
+                autocomplete="off"
+                placeholder="Si lo dejas vacío, se genera uno automático"
+                class="mt-1 w-full rounded-xl border border-primary-200 px-3 py-2.5 text-sm text-primary-900 placeholder:text-primary-400 focus:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-secondary-200"
+                [value]="handleColaboradorOpcional()"
+                (input)="onHandleColaboradorOpcionalInput($event)"
+              />
             </label>
           } @else {
             <label class="font-body block text-sm text-primary-700">
@@ -167,7 +162,7 @@
               Procesando…
             } @else {
               @if (tipo() === 'collaborator') {
-                Registrar colaborador
+                Activar cuenta de colaborador
               } @else {
                 Registrarse como {{ tipo() === 'admin' ? 'Administrador' : 'Comprador' }}
               }
