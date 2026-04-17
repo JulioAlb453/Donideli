@@ -1,6 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal, computed, OnDestroy } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from '../../../core/application/auth/auth-session.service';
 import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
+import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import {
   collaborationTokenUrl,
   collaborationWsUrl,
@@ -34,8 +37,11 @@ export class BuyerChatService implements OnDestroy {
   private cachedToken = '';
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
+  private cachedStoreAdminPeer: string | null = null;
 
   private readonly auth = inject(AuthSessionService);
+  private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = inject(API_BASE_URL);
   private readonly notificacion = inject(NotificationService);
   private readonly chatApi = inject(CollaborationChatApiService);
   private chatVisible = false;
@@ -108,11 +114,13 @@ export class BuyerChatService implements OnDestroy {
     this._conectado.set(false);
     this._room_activo.set('');
     this.currentRoom = '';
+    this.cachedStoreAdminPeer = null;
   }
 
-  entrar_room(id_colaborador: string): void {
+  async entrar_room(id_colaborador: string): Promise<void> {
+    const storePeer = await this.resolveStoreAdminPeer();
     const userId = this.auth.currentUser()?.email ?? 'anonymous';
-    const peer = this.normalizeChatPeer(id_colaborador);
+    const peer = this.normalizeChatPeer(id_colaborador, storePeer);
     const parts = [userId, peer].sort();
     const room = `chat:${parts[0]}:${parts[1]}`;
 
@@ -124,7 +132,7 @@ export class BuyerChatService implements OnDestroy {
     this._room_activo.set(room);
     this._mensajes.set([]);
     this.enviarJoin(room);
-    void this.hydrateMensajes(room);
+    await this.hydrateMensajes(room);
   }
 
   enviar_mensaje(texto: string): void {
@@ -205,17 +213,39 @@ export class BuyerChatService implements OnDestroy {
     }
   }
 
-  private normalizeChatPeer(raw: string): string {
+  private async resolveStoreAdminPeer(): Promise<string> {
+    if (this.cachedStoreAdminPeer !== null) {
+      return this.cachedStoreAdminPeer;
+    }
+    const base = this.apiBaseUrl.replace(/\/$/, '');
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ peer_id?: string }>(`${base}/admins/contacto-chat`),
+      );
+      const id = res?.peer_id?.trim() ?? '';
+      this.cachedStoreAdminPeer = id || this.fallbackStorePeer();
+    } catch {
+      this.cachedStoreAdminPeer = this.fallbackStorePeer();
+    }
+    return this.cachedStoreAdminPeer;
+  }
+
+  private fallbackStorePeer(): string {
+    const fb = ADMIN_COLLABORATION_USER_ID.trim();
+    return fb || 'admin';
+  }
+
+  private normalizeChatPeer(raw: string, storePeer: string): string {
     const t = raw.trim();
     if (!t) {
-      return ADMIN_COLLABORATION_USER_ID;
+      return storePeer;
     }
     if (t.includes('@')) {
       return t;
     }
     const lower = t.toLowerCase();
     if (lower === 'donideli' || lower === 'tienda' || lower === 'catalogo' || lower === 'donuts') {
-      return ADMIN_COLLABORATION_USER_ID;
+      return storePeer;
     }
     return t;
   }

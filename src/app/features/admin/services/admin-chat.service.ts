@@ -4,6 +4,7 @@ import {
   collaborationWsUrl,
   environment,
 } from '../../../../environments/environment';
+import { AuthSessionService } from '../../../core/application/auth/auth-session.service';
 import { ADMIN_COLLABORATION_USER_ID } from '../../../core/config/collaboration-chat.constants';
 import { CollaborationChatApiService } from '../../../core/infrastructure/chat/collaboration-chat-api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
@@ -32,10 +33,10 @@ interface WSIncoming {
 const TOKEN_URL = collaborationTokenUrl(environment.wsCollaborationOrigin);
 const WS_URL = collaborationWsUrl(environment.wsCollaborationOrigin);
 const RECONNECT_DELAY = 3000;
-const ADMIN_USER_ID = ADMIN_COLLABORATION_USER_ID;
 
 @Injectable({ providedIn: 'root' })
 export class AdminChatService implements OnDestroy {
+  private readonly auth = inject(AuthSessionService);
   private readonly notificacion = inject(NotificationService);
   private readonly chatApi = inject(CollaborationChatApiService);
   private ws: WebSocket | null = null;
@@ -174,7 +175,7 @@ export class AdminChatService implements OnDestroy {
         ...conv,
         mensajes: [
           ...conv.mensajes,
-          { sender_id: ADMIN_USER_ID, texto: texto.trim(), timestamp, propio: true },
+          { sender_id: this.adminPeerId(), texto: texto.trim(), timestamp, propio: true },
         ],
       });
       this._conversaciones.set(convs);
@@ -196,7 +197,7 @@ export class AdminChatService implements OnDestroy {
       this.send({ type: 'join', room });
     }
     const sender = msg.sender_id ?? 'desconocido';
-    if (sender.toLowerCase() === ADMIN_USER_ID.toLowerCase()) {
+    if (sender.toLowerCase() === this.adminPeerId().toLowerCase()) {
       return;
     }
     const texto = msg.data.texto;
@@ -237,7 +238,7 @@ export class AdminChatService implements OnDestroy {
   private async hydrateRoom(room: string, buyer_id: string): Promise<void> {
     try {
       const rows = await this.chatApi.listMensajes(room);
-      const adminLower = ADMIN_USER_ID.toLowerCase();
+      const adminLower = this.adminPeerId().toLowerCase();
       const fromApi = rows.map((m) => ({
         sender_id: m.sender_id,
         texto: m.texto,
@@ -277,7 +278,7 @@ export class AdminChatService implements OnDestroy {
     const res = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: ADMIN_USER_ID }),
+      body: JSON.stringify({ user_id: this.adminPeerId() }),
     });
     if (!res.ok) throw new Error('Token request failed');
     const data: { token: string } = await res.json();
@@ -285,13 +286,25 @@ export class AdminChatService implements OnDestroy {
   }
 
   private buildRoom(buyer_id: string): string {
-    const parts = [buyer_id, ADMIN_USER_ID].sort();
+    const parts = [buyer_id, this.adminPeerId()].sort();
     return `chat:${parts[0]}:${parts[1]}`;
   }
 
   private extractBuyerFromRoom(room: string): string {
+    const adminId = this.adminPeerId();
     const parts = room.replace('chat:', '').split(':');
-    return parts.find((p) => p !== ADMIN_USER_ID) ?? parts[0];
+    return parts.find((p) => p !== adminId) ?? parts[0];
+  }
+
+  private adminPeerId(): string {
+    const u = this.auth.currentUser();
+    if (u?.role === 'admin') {
+      const id = u.email?.trim();
+      if (id) {
+        return id;
+      }
+    }
+    return ADMIN_COLLABORATION_USER_ID.trim() || 'admin';
   }
 
   private send(obj: Record<string, unknown>): void {

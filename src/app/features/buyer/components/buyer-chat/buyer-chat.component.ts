@@ -29,8 +29,8 @@ export class BuyerChatComponent implements OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['id_colaborador'] && this.id_colaborador) {
-      void this.chat.conectar().then(() => {
-        this.chat.entrar_room(this.id_colaborador);
+      void this.chat.conectar().then(async () => {
+        await this.chat.entrar_room(this.id_colaborador);
       });
     }
   }

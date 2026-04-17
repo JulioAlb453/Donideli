@@ -9,6 +9,7 @@ import { AdminOrderRepositoryPort } from '../../core/domain/admin-order/admin-or
 import { AdminOrderApiRepository } from '../../core/infrastructure/admin-orders/admin-order-api.repository';
 import { GetAllAdminProductsUseCase } from '../../core/application/admin-products/get-all-admin-products.use-case';
 import { GetAllAdminOrdersUseCase } from '../../core/application/admin-orders/get-all-admin-orders.use-case';
+import { UpdateAdminOrderStatusUseCase } from '../../core/application/admin-orders/update-admin-order-status.use-case';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminProductsPageComponent } from './pages/products/admin-products-page.component';
 import { AdminGlobalSalesPageComponent } from './pages/global-sales/admin-global-sales-page.component';
@@ -33,10 +34,12 @@ import { AdminSidebarComponent } from './components/admin-sidebar/admin-sidebar.
     },
     {
       provide: AdminOrderRepositoryPort,
-      useClass: AdminOrderApiRepository,
+      useFactory: (http: HttpClient, api: string) => new AdminOrderApiRepository(http, api),
+      deps: [HttpClient, API_BASE_URL],
     },
     GetAllAdminProductsUseCase,
     GetAllAdminOrdersUseCase,
+    UpdateAdminOrderStatusUseCase,
   ],
 })
 export class AdminModule {}

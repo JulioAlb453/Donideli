@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthSessionService } from '../../../../core/application/auth/auth-session.service';
 import { BuyerCartService } from '../../services/buyer-cart.service';
+import { BuyerCheckoutSubmitService } from '../../services/buyer-checkout-submit.service';
 import { BuyerOrdersService, type BuyerOrderLine } from '../../services/buyer-orders.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 
@@ -29,7 +31,9 @@ interface DatosEntregaCheckout {
 })
 export class BuyerCheckoutPagoPageComponent {
   private readonly router = inject(Router);
+  private readonly authSession = inject(AuthSessionService);
   private readonly cart = inject(BuyerCartService);
+  private readonly checkoutSubmit = inject(BuyerCheckoutSubmitService);
   private readonly ordersService = inject(BuyerOrdersService);
   private readonly notificacion = inject(NotificationService);
 
@@ -81,45 +85,40 @@ export class BuyerCheckoutPagoPageComponent {
     );
     if (!confirmado) return;
 
+    if (!this.authSession.hasRole('buyer')) {
+      await this.notificacion.error(
+        'Inicia sesión',
+        'Debes entrar como comprador para registrar el pedido en el sistema.',
+      );
+      return;
+    }
+
     this.confirmando.set(true);
 
     const datosEntrega = this.leerDatosEntrega();
 
-    const pedidosPorColaborador = new Map<string, {
-      id_colaborador: string;
-      email_colaborador: string;
-      nombre_colaborador: string;
-      lineas: BuyerOrderLine[];
-    }>();
+    const lineasResumen: BuyerOrderLine[] = items.map((item) => ({
+      nombre_producto: item.nombre,
+      cantidad: item.cantidad,
+      precio: item.precio,
+    }));
 
-    for (const item of items) {
-      const key = item.id_colaborador || item.nombre_colaborador;
-      let grupo = pedidosPorColaborador.get(key);
-      if (!grupo) {
-        grupo = {
-          id_colaborador: item.id_colaborador,
-          email_colaborador: item.email_colaborador,
-          nombre_colaborador: item.nombre_colaborador,
-          lineas: [],
-        };
-        pedidosPorColaborador.set(key, grupo);
-      }
-      grupo.lineas.push({
-        nombre_producto: item.nombre,
-        cantidad: item.cantidad,
-        precio: item.precio,
-      });
-    }
-
-    for (const grupo of pedidosPorColaborador.values()) {
+    try {
+      const { id_pedido } = await this.checkoutSubmit.enviarPedidoDesdeCarrito(items, 'transferencia');
       this.ordersService.crear_pedido({
-        id_colaborador: grupo.id_colaborador,
-        email_colaborador: grupo.email_colaborador,
-        nombre_colaborador: grupo.nombre_colaborador,
+        id_colaborador: '',
+        email_colaborador: this.authSession.currentUser()?.email ?? '',
+        nombre_colaborador: 'DoniDeli',
         fecha_entrega: datosEntrega.fecha_entrega,
         horario_entrega: datosEntrega.horario_entrega,
-        lineas: grupo.lineas,
+        lineas: lineasResumen,
+        id_pedido_prefijado: `API-${id_pedido}`,
       });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'No se pudo registrar el pedido.';
+      await this.notificacion.error('Pedido no registrado', msg);
+      this.confirmando.set(false);
+      return;
     }
 
     this.cart.clear();
@@ -128,7 +127,7 @@ export class BuyerCheckoutPagoPageComponent {
 
     await this.notificacion.exito(
       'Pedido confirmado',
-      'Tu pedido fue registrado. Puedes verlo en "Mis pedidos".',
+      'Tu pedido quedó registrado. El administrador lo verá en el historial.',
     );
 
     void this.router.navigate(['/buyer/pedidos']);

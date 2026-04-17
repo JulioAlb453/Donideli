@@ -74,9 +74,7 @@ export class AdminProductsPageComponent implements OnInit, OnDestroy {
   );
 
   ngOnInit(): void {
-    void this.adminChat.conectar().then(() => {
-      this.adminChat.entrar_room('comprador@donideli.com');
-    });
+    void this.adminChat.conectar();
   }
 
   ngOnDestroy(): void {
